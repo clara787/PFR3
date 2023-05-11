@@ -12,12 +12,14 @@ import cv2
 import csv
 import requests
 from bs4 import BeautifulSoup
+import threading
 import time
 
 
 """---------------------------------Var globales-----------------------------------"""
 point = []
-
+url = "http://192.168.4.1"
+url_robot = "http://192.168.4.1/robot"
 """---------------------------------Fenêtre principale du logiciel--------------------------------------"""
 
 
@@ -48,6 +50,7 @@ class MainWindow(QMainWindow):
 class ManuelWindow(QMainWindow) :
     def __init__(self):
         super(ManuelWindow,self).__init__()
+        
         self.main_button = QPushButton("Retour",self)
         self.main_button.setGeometry(10, 10, 200, 60)
         self.main_button.setStyleSheet("QPushButton {background-color: '#00aeef'; color: '#FFFFFF'; font-weight: bold; border-radius: 30} QPushButton:pressed {background-color: lightblue;}")
@@ -58,38 +61,6 @@ class ManuelWindow(QMainWindow) :
         self.map.setStyleSheet("background-color: '#FFFFFF';  color: '#00aeef';font-weight: bold;")
         self.map.setGeometry(290, 10, 700, 500)
         
-        """BOUTONS DIRECTIONS"""
-        self.droite = QPushButton("D", self)
-        self.droite.setGeometry(665, 600, 80, 80)
-        self.droite.setStyleSheet("QPushButton {background-color: '#4B686C'; color: '#FFFFFF'; font-weight: bold; border-radius: 30} QPushButton:pressed {background-color: lightblue;}")
-
-        self.gauche = QPushButton("G", self)
-        self.gauche.setGeometry(535, 600, 80, 80)
-        self.gauche.setStyleSheet("QPushButton {background-color: '#4B686C'; color: '#FFFFFF'; font-weight: bold; border-radius: 30} QPushButton:pressed {background-color: lightblue;}")
-
-        self.haut = QPushButton("H", self)
-        self.haut.setGeometry(600, 535, 80, 80)
-        self.haut.setStyleSheet("QPushButton {background-color: '#4B686C'; color: '#FFFFFF'; font-weight: bold; border-radius: 30} QPushButton:pressed {background-color: lightblue;}")
-
-        self.bas = QPushButton("B", self)
-        self.bas.setGeometry(600, 665, 80, 80)
-        self.bas.setStyleSheet("QPushButton {background-color: '#4B686C'; color: '#FFFFFF'; font-weight: bold; border-radius: 30} QPushButton:pressed {background-color: lightblue;}")
-
-        
-        # Start button
-        self.start_button = QPushButton('Commencer', self)
-        self.start_button.setGeometry(800, 535, 200, 60)
-        self.start_button.setStyleSheet("QPushButton {background-color: '#00aeef'; color: '#FFFFFF'; font-weight: bold; border-radius: 30} QPushButton:pressed {background-color: lightblue;}")
-        self.start_button.clicked.connect(self.affichage_pt)
-        #self.start_button.clicked.connect(self.show_camera)
-        
-
-        #Stop button
-        self.stop_button = QPushButton('Arrêter', self)
-        self.stop_button.setGeometry(800, 665, 200, 60)
-        self.stop_button.setStyleSheet("QPushButton {background-color: '#00aeef'; color: '#FFFFFF'; font-weight: bold; border-radius: 30} QPushButton:pressed {background-color: lightblue;}")
-        self.stop_button.clicked.connect(self.close_video)
-
         #Video display widget
         self.video_display = QLabel(self)
         self.video_display.setAlignment(Qt.AlignCenter)
@@ -97,8 +68,60 @@ class ManuelWindow(QMainWindow) :
         self.video_display.setStyleSheet("background-color: '#FFFFFF';  color: '#00aeef';font-weight: bold;")
         self.video_display.setGeometry(50, 550, 200, 200)
         
+        """BOUTONS DIRECTIONS"""
+        self.droite = QPushButton("D", self)
+        self.droite.setGeometry(665, 600, 80, 80)
+        self.droite.setStyleSheet("QPushButton {background-color: '#4B686C'; color: '#FFFFFF'; font-weight: bold; border-radius: 30} QPushButton:pressed {background-color: lightblue;}")
+        #self.droite.clicked.connect(self.deplacement(2))
+        
+        self.gauche = QPushButton("G", self)
+        self.gauche.setGeometry(535, 600, 80, 80)
+        self.gauche.setStyleSheet("QPushButton {background-color: '#4B686C'; color: '#FFFFFF'; font-weight: bold; border-radius: 30} QPushButton:pressed {background-color: lightblue;}")
+        #self.gauche.clicked.connect(self.deplacement(1))
+
+        self.haut = QPushButton("H", self)
+        self.haut.setGeometry(600, 535, 80, 80)
+        self.haut.setStyleSheet("QPushButton {background-color: '#4B686C'; color: '#FFFFFF'; font-weight: bold; border-radius: 30} QPushButton:pressed {background-color: lightblue;}")
+        #self.haut.clicked.connect(self.deplacement(3))
+
+        self.bas = QPushButton("B", self)
+        self.bas.setGeometry(600, 665, 80, 80)
+        self.bas.setStyleSheet("QPushButton {background-color: '#4B686C'; color: '#FFFFFF'; font-weight: bold; border-radius: 30} QPushButton:pressed {background-color: lightblue;}")
+        #self.bas.clicked.connect(self.deplacement(4))
+        
+        # Start button
+        self.start_button = QPushButton('Commencer', self)
+        self.start_button.setGeometry(800, 535, 200, 60)
+        self.start_button.setStyleSheet("QPushButton {background-color: '#00aeef'; color: '#FFFFFF'; font-weight: bold; border-radius: 30} QPushButton:pressed {background-color: lightblue;}")
+        self.start_button.clicked.connect(self.point_thread)
+        
+
+        #Stop button
+        self.stop_button = QPushButton('Arrêter', self)
+        self.stop_button.setGeometry(800, 665, 200, 60)
+        self.stop_button.setStyleSheet("QPushButton {background-color: '#00aeef'; color: '#FFFFFF'; font-weight: bold; border-radius: 30} QPushButton:pressed {background-color: lightblue;}")
+        self.stop_button.clicked.connect(self.stop_btn)
+        
         #video capture
-        self.cap = cv2.VideoCapture(0)  #cam esp
+        #self.cap = cv2.VideoCapture("http://192.168.4.1/stream")  #cam esp
+        
+        #thread point
+        self.t1 = threading.Thread(target=self.affichage_pt, args=())
+        self.stop = False
+        
+        #thread cam
+        self.t2 = threading.Thread(target=self.show_camera, args=())
+        
+    def deplacement(self, dir):
+        if (dir == 1):
+            self.titre.setText("Gauche")
+        if (dir == 2):
+            self.titre.setText("Droite")
+        if (dir == 3):
+            self.titre.setText("Haut")
+        if (dir == 4):
+            self.titre.setText("Bas")
+        
 
     def goToMainScreen(self):
         main = MainWindow()
@@ -106,11 +129,14 @@ class ManuelWindow(QMainWindow) :
         widget.setCurrentIndex(widget.currentIndex()+1)
     
         
-    
+    def point_thread(self):
+        self.t1.start()
+        self.t2.start()
+        
     def show_camera(self):
-        self.cap = cv2.VideoCapture("http://192.168.4.1/stream")  #cam esp
-        while(self.cap.isOpened()):
-            ret, image = self.cap.read()
+        cap = cv2.VideoCapture(0)  #cam esp
+        while(cap.isOpened() & self.stop == False):
+            ret, image = cap.read()
             if ret == True:            
                 # Convert the image to the RGB format that QImage expects
                 rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -122,60 +148,74 @@ class ManuelWindow(QMainWindow) :
                 if  cv2.waitKey(1) == ord('q') :
                     break
             else:
-                self.cap.release()
+                cap.release()
+                self.stop = True
                 cv2.destroyAllWindows()
                 break
        
-       
-    def affichage_pt(self) :
-        global point
-        coord = ""
-        url = "http://192.168.4.1"
-        requete = requests.get(url)
-        page = requete.content
-        soup = BeautifulSoup(page, features="lxml")
-        coord_str = soup.find("h1").text
         
-        if (coord_str) :
-            point.append(recup_coord(coord_str))
+    def affichage_pt(self) :
+        while(self.stop == False) :
+            global point
             
-            print(point)
-            X0 = self.map.width()
-            Y0 = self.map.height()
-    
-            # Créer une image QPixmap pour le QLabel
-            pixmap = QPixmap(self.map.width(), self.map.height())
-            pixmap.fill(Qt.white)
+            """recupération des coordonnées du point"""
+            requete = requests.get(url)
+            page = requete.content
+            soup = BeautifulSoup(page, features="lxml")
+            coord_str = soup.find("h1").text
             
-            # Dessiner des points sur l'image
-            painter = QPainter(pixmap)
-            painter.translate(X0, Y0)
-            for pt in point:
-                if (point.index(pt) != len(point)-1) :
+            """recupération des coordonnées du robot"""
+            requete_robot = requests.get(url_robot)
+            page_robot = requete_robot.content
+            soup_robot = BeautifulSoup(page_robot, features="lxml")
+            coord_str_robot = soup_robot.find("h1").text
+
+            if (not coord_str == "") | (not coord_str_robot == "") :
+                pt_tmp = recup_coord(coord_str)
+                robot = recup_coord(coord_str_robot)
+                
+                for pt in pt_tmp:
+                    if (pt is not None):
+                        point.append(pt)
+                
+                X0 = self.map.width()
+                Y0 = self.map.height()
+        
+                # Créer une image QPixmap pour le QLabel
+                pixmap = QPixmap(self.map.width(), self.map.height())
+                pixmap.fill(Qt.white)
+                
+                # Dessiner des points sur l'image
+                painter = QPainter(pixmap)
+                painter.translate(X0, Y0)
+                
+                for pt in point:
+                    #if (pt is not None) :
                     painter.setPen(QPen(QColor('blue'), 5))
                     painter.drawPoint(-pt[0], -pt[1])
-                    
-                    painter.setPen(QPen(QColor('black'), 7))
-                    painter.drawPoint(0, 0)
-                else:
-                    break
-            
-            painter.end()
-            # Afficher l'image dans le QLabel
-            self.map.setPixmap(pixmap)
-        else:
-            print("pas de coord")
+                    #print("coucou")
+                    painter.setPen(QPen(QColor('black'), 9))
+                    painter.drawPoint(-robot[0][0], -robot[0][1])
+                
+                painter.end()
+                # Afficher l'image dans le QLabel
+                self.map.setPixmap(pixmap)
+            else:
+                print("pas de coord")
+            time.sleep(1)
         
             
         
-    def close_video(self):
-        self.cap.release()
+    def stop_btn(self):
+        self.stop = True
+        #self.cap.release()
         cv2.destroyAllWindows()
         self.video_display.setText("CAMERA")
         self.video_display.setStyleSheet("background-color: '#FFFFFF';  color: '#00aeef';font-weight: bold;")
     
     def closeEvent(self, event):
-        self.cap.release()
+        self.stop = True
+        #self.cap.release()
         event.accept()
         
 class AutoWindow(QMainWindow) :
@@ -202,23 +242,31 @@ class AutoWindow(QMainWindow) :
         self.start_button = QPushButton('Commencer', self)
         self.start_button.setGeometry(400, 665, 200, 60)
         self.start_button.setStyleSheet("QPushButton {background-color: '#00aeef'; color: '#FFFFFF'; font-weight: bold; border-radius: 30} QPushButton:pressed {background-color: lightblue;}")
-        self.start_button.clicked.connect(self.show_camera)
+        #self.start_button.clicked.connect(self.show_camera)
+        self.start_button.clicked.connect(self.point_thread)
+        #self.start_button.clicked.connect(self.deplacement)
         
 
         #Stop button
         self.stop_button = QPushButton('Arrêter', self)
         self.stop_button.setGeometry(650, 665, 200, 60)
         self.stop_button.setStyleSheet("QPushButton {background-color: '#00aeef'; color: '#FFFFFF'; font-weight: bold; border-radius: 30} QPushButton:pressed {background-color: lightblue;}")
-        self.stop_button.clicked.connect(self.close_video)
+        self.stop_button.clicked.connect(self.stop_btn)
         
         #video capture
         self.cap = cv2.VideoCapture(0)  #cam esp
+        
+        self.t2 = threading.Thread(target=self.affichage_pt, args=())
+        self.stop = False
 
     def goToMainScreen(self):
         main = MainWindow()
         widget.addWidget(main)
         widget.setCurrentIndex(widget.currentIndex()+1)
     
+    def point_thread(self):
+        self.t2.start()
+        
     def show_camera(self):
         self.cap = cv2.VideoCapture(0)  #cam esp
         while(self.cap.isOpened()):
@@ -237,20 +285,75 @@ class AutoWindow(QMainWindow) :
                 self.cap.release()
                 cv2.destroyAllWindows()
                 break
+       
+        
+    def affichage_pt(self) :
+        while(self.stop == False) :
+            global point
+            
+            """recupération des coordonnées du point"""
+            requete = requests.get(url)
+            page = requete.content
+            soup = BeautifulSoup(page, features="lxml")
+            coord_str = soup.find("h1").text
+            
+            """recupération des coordonnées du robot"""
+            requete_robot = requests.get(url_robot)
+            page_robot = requete_robot.content
+            soup_robot = BeautifulSoup(page_robot, features="lxml")
+            coord_str_robot = soup_robot.find("h1").text
+
+            if (not coord_str == "") | (not coord_str_robot == "") :
+                pt_tmp = recup_coord(coord_str)
+                robot = recup_coord(coord_str_robot)
+                
+                for pt in pt_tmp:
+                    if (pt is not None):
+                        point.append(pt)
+                
+                X0 = self.map.width()
+                Y0 = self.map.height()
+        
+                # Créer une image QPixmap pour le QLabel
+                pixmap = QPixmap(self.map.width(), self.map.height())
+                pixmap.fill(Qt.white)
+                
+                # Dessiner des points sur l'image
+                painter = QPainter(pixmap)
+                painter.translate(X0, Y0)
+                
+                for pt in point:
+                    #if (pt is not None) :
+                    painter.setPen(QPen(QColor('blue'), 5))
+                    painter.drawPoint(-pt[0], -pt[1])
+                    #print("coucou")
+                    painter.setPen(QPen(QColor('black'), 9))
+                    painter.drawPoint(-robot[0][0], -robot[0][1])
+                
+                painter.end()
+                # Afficher l'image dans le QLabel
+                self.map.setPixmap(pixmap)
+            else:
+                print("pas de coord")
+            time.sleep(1)
+        
     
-    def close_video(self):
+    def stop_btn(self):
+        self.stop = True
         self.cap.release()
         cv2.destroyAllWindows()
         self.video_display.setText("CAMERA")
         self.video_display.setStyleSheet("background-color: '#FFFFFF';  color: '#00aeef';font-weight: bold;")
     
     def closeEvent(self, event):
+        self.stop = True
         self.cap.release()
         event.accept()
 
             
 def recup_coord(pt) : #retour liste couple de coord
-    global point   
+    #global point
+    point_tmp = []
     X = ""
     Y = ""
     
@@ -265,12 +368,16 @@ def recup_coord(pt) : #retour liste couple de coord
                 Y += pt[i]
                 i+=1
             if pt[i] == "F" :
-                point.append((int(X),int(Y)))
+                """if ("." in X):
+                    X = X[:X.index(".")]
+                if ("." in Y):
+                    Y = Y[:Y.index(".")]"""
+                point_tmp.append((int(X),int(Y)))
                 X = ""
                 Y = ""
         
         
-    #return point
+    return point_tmp
         
 if __name__ == "__main__": 
     app = QApplication(sys.argv)
@@ -280,9 +387,10 @@ if __name__ == "__main__":
     """exection de la fenêtre principale"""
     window = MainWindow()
     widget.addWidget(window)
-    widget.setFixedSize(1200,800)
+    widget.resize(1200,800)
     widget.show()
-
+    
+    
     app.exec_()
     app.exit()
     
