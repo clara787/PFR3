@@ -1,7 +1,8 @@
 #include <Servo.h>
 
-#define LEFT_MOTORS_PIN   2
-#define RIGHT_MOTORS_PIN  3
+#define LEFT_MOTORS_PIN   6
+#define RIGHT_MOTORS_PIN  7
+#define DELAI             1000
 
 Servo servoGauche;
 Servo servoDroite;
@@ -13,21 +14,21 @@ void setup() {
 
 void loop() {
   avancer(128);
-  delay(500);
+  delay(DELAI);
   stop();
-  delay(500);
+  delay(DELAI);
   reculer(128);
-  delay(500);
+  delay(DELAI);
   stop();
-  delay(500);
+  delay(DELAI);
   tournerGauche(128);
-  delay(500);
+  delay(DELAI);
   stop();
-  delay(500);
+  delay(DELAI);
   tournerDroite(128);
-  delay(500);
+  delay(DELAI);
   stop();
-  delay(500);
+  delay(DELAI);
 }
 
 //Fonction avancer avec choix vitesse (entre 0 et 255)

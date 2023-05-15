@@ -1,7 +1,7 @@
-#define R_CLOCKWISE_PIN           4
-#define R_COUNTER_CLOCKWISE_PIN   5
-#define L_CLOCKWISE_PIN           6
-#define L_COUNTER_CLOCKWISE_PIN   7
+#define R_CLOCKWISE_PIN           2
+#define R_COUNTER_CLOCKWISE_PIN   4
+#define L_CLOCKWISE_PIN           3
+#define L_COUNTER_CLOCKWISE_PIN   5
 //PPR : nombre d'impulsions par révolution
 #define PPR                       3000.0
 #define WHEEL_DIAM                12.065

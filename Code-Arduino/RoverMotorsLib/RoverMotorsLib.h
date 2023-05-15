@@ -1,8 +1,8 @@
 #ifndef __ROVER_MOTORS_LIB__
 #define __ROVER_MOTORS_LIB__
 
-#define LEFT_MOTORS_PIN   2
-#define RIGHT_MOTORS_PIN  3
+#define LEFT_MOTORS_PIN   6
+#define RIGHT_MOTORS_PIN  7
 
 //Fonction initialisation
 void initRover();
