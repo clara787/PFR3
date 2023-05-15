@@ -1,11 +1,16 @@
-#include "OpticalEncodersLib.h"
-#include <Arduino.h>
+#define R_CLOCKWISE_PIN           4
+#define R_COUNTER_CLOCKWISE_PIN   5
+#define L_CLOCKWISE_PIN           6
+#define L_COUNTER_CLOCKWISE_PIN   7
+//PPR : nombre d'impulsions par révolution
+#define PPR                       3000.0
+#define WHEEL_DIAM                12.065
+#define PI                        3.14
 
 volatile float rightCounter = 0;
-volatile float leftCounter = 0;
+volatile long leftCounter = 0;
 
-//Fonction initialisation encodeurs
-void initEncoders(){
+void setup() {
   pinMode(R_CLOCKWISE_PIN, INPUT);
   pinMode(R_COUNTER_CLOCKWISE_PIN, INPUT);
   pinMode(L_CLOCKWISE_PIN, INPUT);
@@ -13,6 +18,23 @@ void initEncoders(){
 
   attachInterrupt(digitalPinToInterrupt(R_CLOCKWISE_PIN), rightInterruptFunction, RISING);
   attachInterrupt(digitalPinToInterrupt(L_CLOCKWISE_PIN), leftInterruptFunction, RISING);
+
+  Serial.begin(9600);
+  Serial.println("Prêt");
+}
+
+void loop() {
+  
+  Serial.print("Compteur encodeur droite : ");
+  Serial.println(rightCounter);
+  float angle = counterToAngle(rightCounter);
+  Serial.print("Angle : ");
+  Serial.println(angle);
+  Serial.print("Distance (cm) : ");
+  Serial.println(angleToCm(angle));
+  delay(1000);
+
+  //majPosition(20, 20);
 }
 
 //Fonction interruption encodeur droite
@@ -43,15 +65,12 @@ void leftInterruptFunction(){
   }
 }
 
+//Fonction qui calcul la distance effectuée
 float counterToCm(int counter){
   float angle = counter / PPR * 360.0; // Calcul angle effectué
   return (angle*PI/180) * (WHEEL_DIAM/2); //Calcul distance parcourue
 }
 
-float getLeftCounter(){
-  return leftCounter;
-}
-
-float getRightCounter(){
-  return rightCounter;
+void majPosition(int x, int y){
+  
 }
