@@ -80,13 +80,13 @@ class ManuelWindow(QMainWindow) :
         self.gauche.setEnabled(False)
         self.gauche.clicked.connect(lambda : deplacement(1))
 
-        self.haut = QPushButton("H", self)
+        self.haut = QPushButton("Av", self)
         self.haut.setGeometry(1015, 535, 80, 80)
         self.haut.setStyleSheet("QPushButton {background-color: '#4B686C'; color: '#FFFFFF'; font-weight: bold; border-radius: 30} QPushButton:pressed {background-color: lightblue;}")
         self.haut.setEnabled(False)
         self.haut.clicked.connect(lambda : deplacement(3))
 
-        self.bas = QPushButton("B", self)
+        self.bas = QPushButton("Ar", self)
         self.bas.setGeometry(1015, 665, 80, 80)
         self.bas.setStyleSheet("QPushButton {background-color: '#4B686C'; color: '#FFFFFF'; font-weight: bold; border-radius: 30} QPushButton:pressed {background-color: lightblue;}")
         self.bas.setEnabled(False)
