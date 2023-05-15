@@ -23,5 +23,9 @@ void loop() {
   Serial.println(leftCounter);
   Serial.print("Distance (cm) : ");
   Serial.println(counterToCm(leftCounter));
+
+  Serial.print("Rotation rover : ");
+  Serial.println(roverRotation());
+
   delay(1000);
 }

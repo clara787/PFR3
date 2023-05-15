@@ -9,6 +9,7 @@
 #define PPR                       3000.0
 #define WHEEL_DIAM                12.065
 #define PI                        3.14
+#define ROVER_RADIUS              13.7
 
 //Fonction initialisation encodeurs
 void initEncoders();
@@ -25,5 +26,9 @@ float counterToCm(long counter);
 //fonction getter
 long getLeftCounter();
 long getRightCounter();
+
+float roverRotation();
+
+//boolean isTurning();
 
 #endif

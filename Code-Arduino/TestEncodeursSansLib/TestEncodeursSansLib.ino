@@ -23,8 +23,7 @@ void setup() {
   Serial.println("Prêt");
 }
 
-void loop() {
-  
+void loop() {  
   Serial.print("Compteur encodeur droite : ");
   Serial.println(rightCounter);
   Serial.print("Distance (cm) : ");
@@ -66,8 +65,4 @@ void leftInterruptFunction(){
 float counterToCm(long counter){
   float angle = counter / PPR * 360.0; // Calcul angle effectué
   return (angle*PI/180) * (WHEEL_DIAM/2); //Calcul distance parcourue
-}
-
-void majPosition(int x, int y){
-  
 }

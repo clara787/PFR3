@@ -35,17 +35,18 @@ void leftInterruptFunction(){
   int leftBChannel = digitalRead(L_COUNTER_CLOCKWISE_PIN);
 
   if(leftAChannel == leftBChannel){
-    leftCounter--;
+    leftCounter++;
   }
 
   else{
-    leftCounter++;
+    leftCounter--;
   }
 }
 
+//Fonction convertion counter (nombre d'impulsions) -> distance
 float counterToCm(long counter){
-  float angle = counter / PPR * 360.0; // Calcul angle effectué
-  return (angle*PI/180) * (WHEEL_DIAM/2); //Calcul distance parcourue
+  float angle = counter / PPR * 360.0; // Calcul angle effectué (en degré)
+  return (angle*PI/180) * (WHEEL_DIAM/2); //Calcul distance parcourue (en cm)
 }
 
 long getLeftCounter(){
@@ -55,3 +56,35 @@ long getLeftCounter(){
 long getRightCounter(){
   return rightCounter;
 }
+
+//Fonction calcul rotation rover
+//Renvoie une valeur négative si tourne à gauche      
+//        une valeur positive si tourne à droite
+//        0 sinon
+float roverRotation(){
+  float rotationAngle;
+
+  //Le robot tourne à gauche
+  if(leftCounter < 0 && rightCounter > 0){
+    float distance = counterToCm(rightCounter);
+    rotationAngle = -(distance / ROVER_RADIUS) * 180 / PI;  //Calcul rotation rover (en degré)
+  }
+
+  //Le robot tourne à droite
+  else if(leftCounter > 0 && rightCounter < 0){
+    float distance = counterToCm(leftCounter);
+    rotationAngle = (distance / ROVER_RADIUS) * 180 / PI; //Calcul rotation rover (en degré)
+  }
+
+  //Le robot avance ou recule
+  else{
+    rotationAngle = 0;
+  }
+
+  return rotationAngle;
+}
+
+//Fonction 
+/*boolean isTurning(){
+  return (leftCounter < (rightCounter-10)) || (leftCounter > (rightCounter+10));
+}*/
