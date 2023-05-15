@@ -1,9 +1,6 @@
+#include "RoverMotorsLib.h"
 
 #include "capteur.h"
-#include "RoverMotorsLib.h"
-#include "espcom.h"
-#define rxPin 19
-#define txPin 18
 
 int mode = 1;
 unsigned char Button;
@@ -20,31 +17,29 @@ int angle;
 
 void setup() {
   // initialize the serial communications:
-    //pinMode(rxPin, INPUT);
-    //pinMode(txPin, OUTPUT);
     // Set the baud rate for the SoftwareSerial object
     initRover();
+    Serial.begin(9600);
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-  avancer(255);
-  /*distanceMur = Wall();
+
+  distanceMur = Wall();
   presence = ObstacleHere();
-  Button = getCharacterESP();
-  Serial.println(Button);
   if (Button == 'A') mode = 1;
   if (Button == 'M') mode = 2;
    
   if (count > 2000) {
-    sendData();
     count = 0;
   }
 
   if (mode==1) ModeAuto();
-  else if (mode==2) ModeManuel();  
+  else if (mode==2) ModeManuel(); 
+  Serial.println(distanceMur);
 
-  count++;*/
+  count++;
+
   
 }
 
@@ -53,16 +48,19 @@ void ModeAuto(){
 
         if((distanceMur<40)&&!presence){
            reculer(100);
+           Serial.println("avance");
         }
-        else if(presence && (distanceMur<40)){
+        else if(presence){
             tournerGauche(100);
             delay(1500);
+            Serial.println("Gauche");
         }
         else if(distanceMur > 40) {
          tournerDroite(100);
          delay(1500);
          reculer(100);
          delay(1500);
+         Serial.println("Droite");
         }
 }
 
