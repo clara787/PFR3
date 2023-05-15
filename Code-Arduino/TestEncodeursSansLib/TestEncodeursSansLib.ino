@@ -7,7 +7,7 @@
 #define WHEEL_DIAM                12.065
 #define PI                        3.14
 
-volatile float rightCounter = 0;
+volatile long rightCounter = 0;
 volatile long leftCounter = 0;
 
 void setup() {
@@ -27,11 +27,8 @@ void loop() {
   
   Serial.print("Compteur encodeur droite : ");
   Serial.println(rightCounter);
-  float angle = counterToAngle(rightCounter);
-  Serial.print("Angle : ");
-  Serial.println(angle);
   Serial.print("Distance (cm) : ");
-  Serial.println(angleToCm(angle));
+  Serial.println(counterToCm(rightCounter));
   delay(1000);
 
   //majPosition(20, 20);
@@ -66,7 +63,7 @@ void leftInterruptFunction(){
 }
 
 //Fonction qui calcul la distance effectuée
-float counterToCm(int counter){
+float counterToCm(long counter){
   float angle = counter / PPR * 360.0; // Calcul angle effectué
   return (angle*PI/180) * (WHEEL_DIAM/2); //Calcul distance parcourue
 }

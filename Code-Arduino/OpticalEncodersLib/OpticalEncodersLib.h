@@ -1,3 +1,6 @@
+#ifndef __ENCODERS_LIB__
+#define __ENCODERS_LIB__
+
 #define R_CLOCKWISE_PIN           4
 #define R_COUNTER_CLOCKWISE_PIN   5
 #define L_CLOCKWISE_PIN           6
@@ -17,7 +20,10 @@ void rightInterruptFunction();
 void leftInterruptFunction();
 
 //Fonction qui calcul la distance effectuée
-float counterToCm(int counter);
+float counterToCm(long counter);
 
-float getLeftCounter();
-float getRightCounter();
+//fonction getter
+long getLeftCounter();
+long getRightCounter();
+
+#endif

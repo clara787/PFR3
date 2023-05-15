@@ -1,19 +1,27 @@
 #include "OpticalEncodersLib.h"
 
 void setup() {
-  void initEncoders();
+  initEncoders();
 
   Serial.begin(9600);
   Serial.println("Prêt");
 }
 
 void loop() {
-  float rightCounter = getRightCounter();
+  noInterrupts();
+  long rightCounter = getRightCounter();
+  long leftCounter = getLeftCounter();
+  interrupts();
+
   Serial.print("Compteur encodeur droite : ");
   Serial.println(rightCounter);
   Serial.print("Distance (cm) : ");
   Serial.println(counterToCm(rightCounter));
-  delay(1000);
 
-  //majPosition(20, 20);
+  
+  Serial.print("Compteur encodeur gauche : ");
+  Serial.println(leftCounter);
+  Serial.print("Distance (cm) : ");
+  Serial.println(counterToCm(leftCounter));
+  delay(1000);
 }

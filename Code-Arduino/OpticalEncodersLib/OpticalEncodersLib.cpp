@@ -1,8 +1,8 @@
 #include "OpticalEncodersLib.h"
 #include <Arduino.h>
 
-volatile float rightCounter = 0;
-volatile float leftCounter = 0;
+volatile long rightCounter = 0;
+volatile long leftCounter = 0;
 
 //Fonction initialisation encodeurs
 void initEncoders(){
@@ -43,15 +43,15 @@ void leftInterruptFunction(){
   }
 }
 
-float counterToCm(int counter){
+float counterToCm(long counter){
   float angle = counter / PPR * 360.0; // Calcul angle effectué
   return (angle*PI/180) * (WHEEL_DIAM/2); //Calcul distance parcourue
 }
 
-float getLeftCounter(){
+long getLeftCounter(){
   return leftCounter;
 }
 
-float getRightCounter(){
+long getRightCounter(){
   return rightCounter;
 }
