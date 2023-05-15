@@ -50,11 +50,19 @@ float counterToCm(long counter){
 }
 
 long getLeftCounter(){
-  return leftCounter;
+  long tmp = leftCounter;
+  leftCounter = 0;
+  return tmp;
 }
 
 long getRightCounter(){
-  return rightCounter;
+  long tmp = rightCounter;
+  rightCounter =0;
+  return tmp;
+}
+
+boolean isStraight(){
+  return (!((leftCounter < 0 && rightCounter > 0) || (leftCounter > 0 && rightCounter < 0)));
 }
 
 //Fonction calcul rotation rover
