@@ -6,3 +6,5 @@ Ultrasonic ultrasonicWall(11, 10); // Trig et Echo
 boolean ObstacleHere();
 int Wall();
 void Scan();
+void majAngle();
+float getAngle();
