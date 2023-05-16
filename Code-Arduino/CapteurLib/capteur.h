@@ -1,10 +1,7 @@
+#ifndef __CAPTEURS_LIB__
+#define __CAPTEURS_LIB__
 #include <Ultrasonic.h>
-
-Ultrasonic ultrasonicAvant(9, 8); // Trig et Echo
-Ultrasonic ultrasonicWall(11, 10); // Trig et Echo
 
 boolean ObstacleHere();
 int Wall();
-void Scan();
-void majAngle();
-float getAngle();
+#endif
