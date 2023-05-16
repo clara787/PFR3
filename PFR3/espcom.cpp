@@ -2,11 +2,12 @@
 #include "Arduino.h"
 #include <SoftwareSerial.h>
 
-SoftwareSerial SerialS2(8,9);
+SoftwareSerial SerialS2(8,13);
+//13 Tx
 
 void setup_ESPCOM(){
   pinMode(8,INPUT);
-  pinMode(9,OUTPUT);
+  pinMode(13,OUTPUT);
   SerialS2.begin(115200);
 }
 

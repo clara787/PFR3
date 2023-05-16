@@ -7,7 +7,7 @@
 #define rxPin 19
 #define txPin 18
 
-int mode = 1;
+int mode = 2;
 unsigned char Button;
 int distanceMur;
 int count =0;
@@ -17,7 +17,7 @@ int X = 0;
 int Y = 0;
 int angle;
 unsigned long previousMillis = 0;
-unsigned long interval = 100;
+unsigned long interval = 1000;
 
 // Set up a new SoftwareSerial object
 
@@ -26,7 +26,9 @@ void setup() {
     //pinMode(rxPin, INPUT);
     //pinMode(txPin, OUTPUT);
     // Set the baud rate for the SoftwareSerial object
+    Serial.begin(9600);
     initRover();
+    setup_ESPCOM();
 }
 
 void loop(){
@@ -37,59 +39,51 @@ void loop(){
     Scan();
   }
   // put your main code here, to run repeatedly:
-  avancer(255);
-  /*distanceMur = Wall();
+  distanceMur = Wall();
   presence = ObstacleHere();
   Button = getCharacterESP();
-  Serial.println(Button);
   if (Button == 'A') mode = 1;
   if (Button == 'M') mode = 2;
-   
-  if (count > 2000) {
-    sendData();
-    count = 0;
-  }
+ 
 
   if (mode==1) ModeAuto();
   else if (mode==2) ModeManuel();  
-
-  count++;*/
   
 }
 
 
 void ModeAuto(){
         if((distanceMur<40)&&!presence){
-           reculer(100);
+           avancer(200);
         }
         else if(presence && (distanceMur<40)){
-            tournerGauche(100);
+            tournerGauche(200);
             delay(1500);
         }
         else if(distanceMur > 40) {
-         tournerDroite(100);
+         tournerDroite(200);
          delay(1500);
-         reculer(100);
+         avancer(200);
          delay(1500);
         }
 }
 
 void ModeManuel(){
     if(Button == 'B') {
-      avancerTOR();
-      delay(5000);
+      reculer(200);
+      delay(100);
     }
-    else if(Button == 'H') {
-      reculerTOR();
-      delay(5000);
+    else if(Button == 'H'){
+      avancer(200);
+      delay(100);
     }
-    else if(Button == 'G') {
-      tournerGauche(100);
-      delay(5000);
+    else if(Button == 71) {
+      tournerGauche(200);
+      delay(100);
     }
     else if(Button == 'D') {
-      tournerDroite(100);
-      delay(5000);
+      tournerDroite(200);
+      delay(100);
     }
     else stop();
 }
