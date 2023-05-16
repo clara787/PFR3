@@ -8,6 +8,7 @@
 #define txPin 18
 
 int mode = 2;
+int mouvement = 0;
 unsigned char Button;
 int distanceMur;
 int count =0;
@@ -15,7 +16,7 @@ boolean presence;
 
 int X = 0;
 int Y = 0;
-int angle;
+float angle;
 unsigned long previousMillis = 0;
 unsigned long interval = 1000;
 
@@ -47,25 +48,27 @@ void loop(){
  
 
   if (mode==1) ModeAuto();
-  else if (mode==2) ModeManuel();  
+  else if (mode==2) ModeManuel();
+  
+  if(mouvement == 0) angle = getAngle();
+  else if (abs(getAngle() - angle) >=85) mouvement = 0;
   
 }
 
 
 void ModeAuto(){
-        if((distanceMur<40)&&!presence){
+        if((distanceMur<40)&&!presence && (mouvement ==0){
            avancer(200);
         }
-        else if(presence && (distanceMur<40)){
+        else if((presence && (distanceMur<40))||(mouvement == 1) ){
+            mouvement = 1;
             tournerGauche(200);
-            delay(1500);
         }
-        else if(distanceMur > 40) {
+        else if((distanceMur > 40)||(mouvement == 2)) {
          tournerDroite(200);
-         delay(1500);
-         avancer(200);
-         delay(1500);
+         mouvement = 2;
         }
+        else avancer(200);
 }
 
 void ModeManuel(){
