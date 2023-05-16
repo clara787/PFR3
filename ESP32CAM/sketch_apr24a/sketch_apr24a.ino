@@ -40,6 +40,7 @@ void setup() {
   server.on("/robot",handle_robot);
   server.on("/stream",HTTP_GET, FluxVideo);
   server.on("/image",HTTP_GET, FluxImage);
+  server.on("/S",handle_S);
   server.begin();
 }
 
@@ -60,6 +61,11 @@ void handle_root(){
   server.send(200,"text/html",HTML);
   point = "";
   FT = "";
+}
+
+void handle_S(){
+  Serial.write("S");
+  server.send(200,"text/html",HTML_top+HTML_bottom);
 }
 
 void handle_G(){

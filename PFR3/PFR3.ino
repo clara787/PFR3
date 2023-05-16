@@ -71,22 +71,25 @@ void ModeAuto(){
         else avancer(200);
 }
 
+int mode_Manuel=0;
 void ModeManuel(){
-    if(Button == 'B') {
+    if(Button == 'B')mode_Manuel = 4;
+    if(Button == 'H')mode_Manuel = 3;
+    if(Button == 'G')mode_Manuel = 2;
+    if(Button == 'D')mode_Manuel = 1;
+    if(Button == 'S')mode_Manuel = 0;
+
+    if(mode_Manuel == 4) {
       reculer(200);
-      delay(100);
     }
-    else if(Button == 'H'){
+    else if(mode_Manuel == 3){
       avancer(200);
-      delay(100);
     }
-    else if(Button == 71) {
+    else if(mode_Manuel == 2) {
       tournerGauche(200);
-      delay(100);
     }
-    else if(Button == 'D') {
+    else if(mode_Manuel == 1){
       tournerDroite(200);
-      delay(100);
     }
     else stop();
 }
