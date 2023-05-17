@@ -51,24 +51,37 @@ void loop(){
 
   if (mode==1) ModeAuto();
   else if (mode==2) ModeManuel();
+
+  if((presence && (distanceMur<40))){   
+   count = 1; 
+   mouvement = 1;
+  }
+  if(distanceMur > 40){   
+   count = 1; 
+   mouvement = 2;
+  }
+
+  if(count == 100) count =0;
   
-  if(mouvement == 0) angle = getAngle();
-  else if (abs(getAngle() - angle) >=85) mouvement = 0;
+  //if(mouvement == 0) angle = getAngle();
+  //else if (abs(getAngle() - angle) >=85) mouvement = 0;
   
 }
 
 
 void ModeAuto(){
-        if((distanceMur<40)&& !presence && (mouvement == 0)){
+        if((distanceMur<40)&& !presence && (count == 0)){
            avancer(200);
         }
-        else if((presence && (distanceMur<40))||(mouvement == 1) ){
-            mouvement = 1;
+        else if(mouvement == 1){
+           // mouvement = 1;
             tournerGauche(200);
+            count ++;
         }
-        else if((distanceMur > 40)||(mouvement == 2)) {
+        else if(mouvement == 2) {
          tournerDroite(200);
-         mouvement = 2;
+         count ++;
+         //mouvement = 2;
         }
         else avancer(200);
 }
