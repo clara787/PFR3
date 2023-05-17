@@ -15,7 +15,7 @@ String HTML_top = "<!DOCTYPE html>\
 String HTML_bottom = "</h1>\
                       </body>\
                       </html>";
-const char* ssid = "PFR3_WiFi_2";
+const char* ssid = "PFR3_WiFi_3";
 const char* password = "123456789";
 
 WebServer server(80);

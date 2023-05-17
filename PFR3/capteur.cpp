@@ -33,23 +33,21 @@ void Scan(){
 
   x = dist * cos(getAngle()) + x;
   y = dist * sin(getAngle()) + y;
-  Serial.println(x/10);
-  Serial.println(y/10);
-  sendPoint(x/10,y/10);
+  sendPoint(x,y);
 }
 
 void majAngle(){
   if(isStraight())
-    offset = analogRead(A0);
+    offset = analogRead(A5);
   else{
   
-    vitesse = analogRead(A0) - offset;
+    vitesse = analogRead(A5) - offset;
     if(abs(vitesse)>=10)
       pos += vitesse * temps;
       angle_cap = pos * 0.45;
-    }
+  }
 }
 
 float getAngle(){
-    return angle_cap;
+    return angle_cap + 90;
 }

@@ -3,6 +3,7 @@
 #include "RoverMotorsLib.h"
 #include "espcom.h"
 #include "positionLib.h"
+#include "OpticalEncodersLib.h"
 
 #define rxPin 19
 #define txPin 18
@@ -33,6 +34,7 @@ void setup() {
 }
 
 void loop(){
+  Serial.println(getLeftCounter());
   unsigned long currentMillis = millis();
   if(currentMillis - previousMillis >= interval){
     previousMillis = millis();
@@ -57,7 +59,7 @@ void loop(){
 
 
 void ModeAuto(){
-        if((distanceMur<40)&&!presence && (mouvement ==0){
+        if((distanceMur<40)&& !presence && (mouvement == 0)){
            avancer(200);
         }
         else if((presence && (distanceMur<40))||(mouvement == 1) ){
@@ -80,21 +82,21 @@ void ModeManuel(){
     if(Button == 'S')mode_Manuel = 0;
 
     if(mode_Manuel == 4) {
-      reculer(200);
+      reculer(150);
     }
     else if(mode_Manuel == 3){
-      avancer(200);
+      avancer(150);
     }
     else if(mode_Manuel == 2) {
-      tournerGauche(200);
+      tournerGauche(150);
     }
     else if(mode_Manuel == 1){
-      tournerDroite(200);
+      tournerDroite(150);
     }
     else stop();
 }
 
 void Update(){
-  newPosition();
-  majAngle();
+  //newPosition();
+  //majAngle();
 }

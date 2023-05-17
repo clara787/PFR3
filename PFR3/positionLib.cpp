@@ -20,7 +20,7 @@ void newPosition(){
     long leftDist = getLeftCounter();
     float distRight = counterToCm(rightDist);
     float distLeft = counterToCm(leftDist);
-    float dist = rightDist>leftDist?rightDist:leftDist;
+    float dist = (distRight+distLeft)/2;
     //angle = calcul angle avec getAngle();
     x += dist * cos(getAngle()); //getAngle de Rahim
     y += dist * sin(getAngle());
