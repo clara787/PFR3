@@ -73,8 +73,7 @@ void ModeAuto(){
             tournerGauche(175);
             delay(480);
         }
-        if (distanceMur>=20){4
-        ***********************************************************7
+        if (distanceMur>=20){
          avanceDroite(162);
          //mouvement = 2;
         }
