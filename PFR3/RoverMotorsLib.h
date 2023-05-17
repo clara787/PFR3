@@ -21,6 +21,10 @@ void tournerGauche(int vitesse);
 //Fonction tourner à droite
 void tournerDroite(int vitesse);
 
+void avanceDroite(int vitesse);
+
+void avanceGauche(int vitesse);
+
 //Fonction arret
 void stop();
 

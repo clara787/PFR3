@@ -15,8 +15,7 @@ Ultrasonic ultrasonicWall(11, 12); // Trig et Echo
 
 boolean ObstacleHere(){
   int dist = ultrasonicAvant.Ranging(CM);
-
-  return(dist <= 25);
+  return(dist <= 19);
 }
 
 

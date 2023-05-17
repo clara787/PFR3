@@ -8,12 +8,13 @@
 #define rxPin 19
 #define txPin 18
 
-int mode = 2;
+int mode = 1;
 int mouvement = 0;
 unsigned char Button;
 int distanceMur;
 int count =0;
 boolean presence;
+boolean presencePre;
 
 int X = 0;
 int Y = 0;
@@ -34,7 +35,6 @@ void setup() {
 }
 
 void loop(){
-  Serial.println(getLeftCounter());
   unsigned long currentMillis = millis();
   if(currentMillis - previousMillis >= interval){
     previousMillis = millis();
@@ -43,25 +43,18 @@ void loop(){
   }
   // put your main code here, to run repeatedly:
   distanceMur = Wall();
+  presencePre = presence;
   presence = ObstacleHere();
   Button = getCharacterESP();
   if (Button == 'A') mode = 1;
   if (Button == 'M') mode = 2;
- 
 
+  Serial.println(presence&&presencePre);
+  
   if (mode==1) ModeAuto();
   else if (mode==2) ModeManuel();
 
-  if((presence && (distanceMur<40))){   
-   count = 1; 
-   mouvement = 1;
-  }
-  if(distanceMur > 40){   
-   count = 1; 
-   mouvement = 2;
-  }
 
-  if(count == 100) count =0;
   
   //if(mouvement == 0) angle = getAngle();
   //else if (abs(getAngle() - angle) >=85) mouvement = 0;
@@ -70,20 +63,21 @@ void loop(){
 
 
 void ModeAuto(){
-        if((distanceMur<40)&& !presence && (count == 0)){
-           avancer(200);
+        if((distanceMur<=20)&& !(presence&&presencePre)){
+           avanceGauche(162);
         }
-        else if(mouvement == 1){
+        if(presence&&presencePre){
            // mouvement = 1;
-            tournerGauche(200);
-            count ++;
+           reculerTOR();
+           delay(100);
+            tournerGauche(175);
+            delay(480);
         }
-        else if(mouvement == 2) {
-         tournerDroite(200);
-         count ++;
+        if (distanceMur>=20){4
+        ***********************************************************7
+         avanceDroite(162);
          //mouvement = 2;
         }
-        else avancer(200);
 }
 
 int mode_Manuel=0;
