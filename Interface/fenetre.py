@@ -308,6 +308,7 @@ def deplacement(_dir, myclass):
         
 def stop_move() :
     requests.get(urlS)
+    time.sleep(0.1)
     requests.get(urlS)
    
 def init_manuel():
