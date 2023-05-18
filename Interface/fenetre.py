@@ -263,8 +263,8 @@ def affichage_pt(myclass) :
             if (pt is not None):
                 point.append(pt)
         
-        X0 = myclass.map.width()/2
-        Y0 = myclass.map.height()/2
+        X0 = myclass.map.width() - 10
+        Y0 = myclass.map.height() - 10
         
         # Créer une image QPixmap pour le QLabel
         pixmap = QPixmap(myclass.map.width(), myclass.map.height())
