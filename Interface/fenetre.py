@@ -1,25 +1,30 @@
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QObject
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QPushButton, QApplication, QMainWindow
+from PyQt5.QtWidgets import QPushButton, QApplication, QMainWindow, QWidget
 from qtmodern import styles
 from PyQt5.QtWidgets import QLabel
 from PyQt5.QtGui import QPixmap, QImage, QPainter, QPen, QColor
 import sys
 import cv2
 import requests
-import urllib.request
 from bs4 import BeautifulSoup
 import threading
 import time
-import numpy as np
 
 
 """---------------------------------Var globales-----------------------------------"""
-point = []
 url = "http://192.168.4.1"
+urlG = "http://192.168.4.1/G"
+urlD = "http://192.168.4.1/D"
+urlH = "http://192.168.4.1/H"
+urlB = "http://192.168.4.1/B"
+urlA = "http://192.168.4.1/A"
 url_robot = "http://192.168.4.1/robot"
 url_cam = "http://192.168.4.1/image"
-url_auto = "http://192.168.4.1/A"
+urlS = "http://192.168.4.1/S"
+urlM = "http://192.168.4.1/M"
+
+point = []
 robot = [(0,0)]
 """---------------------------------Fenêtre principale du logiciel--------------------------------------"""
 class MyThread(threading.Thread):
@@ -33,22 +38,45 @@ class MyThread(threading.Thread):
         while not self.stop_flag.is_set():
             self.etat = True
             affichage_pt(self.my_class_instance)
-            time.sleep(1)
+            #time.sleep(1)
 
     def stop(self):
         self.stop_flag.set()
         self.etat = False
 
+"""class KeyPressFilter(QObject):
+    def __init__(self, parent):
+        super().__init__(parent)
 
-class ManuelWindow(QMainWindow) :
+    def eventFilter(self, obj, event):
+        if event.type() == event.KeyPress:
+            if event.key() == Qt.Key_Up:
+                deplacement(3, self)
+                return True
+            elif event.key() == Qt.Key_Down:
+                deplacement(4, self)
+                return True
+            elif event.key() == Qt.Key_Left:
+                deplacement(1, self)
+                return True
+            elif event.key() == Qt.Key_Right:
+                deplacement(2, self)
+                return True
+        if event.type() == event.KeyRelease:
+            stop_move()
+            return True
+        return False"""
+
+
+class ManuelWindow(QWidget) :
     def __init__(self):
         super(ManuelWindow,self).__init__()
         
         self.manuel_button = QPushButton("Manuel",self)
         self.manuel_button.setGeometry(990, 10, 200, 60)
-        self.manuel_button.setStyleSheet("QPushButton {background-color: '#00aeef'; color: '#FFFFFF'; font-weight: bold; border-radius: 30; border :5px solid ;} QPushButton:pressed {background-color: lightblue;}")
-        self.manuel_button.setEnabled(False)
+        self.manuel_button.setStyleSheet("QPushButton {background-color: '#00aeef'; color: '#FFFFFF'; font-weight: bold; border-radius: 30} QPushButton:pressed {background-color: lightblue;}")
         self.manuel_button.clicked.connect(self.goToManuelScreen)
+        #self.manuel_button.installEventFilter(KeyPressFilter(self))
         
         self.auto_button = QPushButton("Automatique",self)
         self.auto_button.setGeometry(990, 80, 200, 60)
@@ -68,54 +96,49 @@ class ManuelWindow(QMainWindow) :
         self.video_display.setGeometry(50, 550, 200, 200)
         
         """BOUTONS DIRECTIONS"""
-        self.droite = QPushButton("D", self)
-        self.droite.setGeometry(1080, 600, 80, 80)
+        self.droite = QPushButton("Droite", self)
+        self.droite.setGeometry(655, 600, 80, 80)
         self.droite.setStyleSheet("QPushButton {background-color: '#4B686C'; color: '#FFFFFF'; font-weight: bold; border-radius: 30} QPushButton:pressed {background-color: lightblue;}")
-        self.droite.setEnabled(False)
-        self.droite.clicked.connect(lambda : deplacement(2))
+        self.droite.pressed.connect(lambda : deplacement(2, self))
+        self.droite.released.connect(stop_move)
         
-        self.gauche = QPushButton("G", self)
-        self.gauche.setGeometry(950, 600, 80, 80)
+        self.gauche = QPushButton("Gauche", self)
+        self.gauche.setGeometry(525, 600, 80, 80)
         self.gauche.setStyleSheet("QPushButton {background-color: '#4B686C'; color: '#FFFFFF'; font-weight: bold; border-radius: 30} QPushButton:pressed {background-color: lightblue;}")
-        self.gauche.setEnabled(False)
-        self.gauche.clicked.connect(lambda : deplacement(1))
+        self.gauche.pressed.connect(lambda : deplacement(1, self))
+        self.gauche.released.connect(stop_move)
 
-        self.haut = QPushButton("Av", self)
-        self.haut.setGeometry(1015, 535, 80, 80)
+        self.haut = QPushButton("Avant", self)
+        self.haut.setGeometry(590, 535, 80, 80)
         self.haut.setStyleSheet("QPushButton {background-color: '#4B686C'; color: '#FFFFFF'; font-weight: bold; border-radius: 30} QPushButton:pressed {background-color: lightblue;}")
-        self.haut.setEnabled(False)
-        self.haut.clicked.connect(lambda : deplacement(3))
+        self.haut.pressed.connect(lambda : deplacement(3, self))
+        self.haut.released.connect(stop_move)
 
-        self.bas = QPushButton("Ar", self)
-        self.bas.setGeometry(1015, 665, 80, 80)
+        self.bas = QPushButton("Arrière", self)
+        self.bas.setGeometry(590, 665, 80, 80)
         self.bas.setStyleSheet("QPushButton {background-color: '#4B686C'; color: '#FFFFFF'; font-weight: bold; border-radius: 30} QPushButton:pressed {background-color: lightblue;}")
-        self.bas.setEnabled(False)
-        self.bas.clicked.connect(lambda : deplacement(4))
+        self.bas.pressed.connect(lambda : deplacement(4, self))
+        self.bas.released.connect(stop_move)
         
         # Start button
-        self.start_button = QPushButton('Commencer', self)
+        """self.start_button = QPushButton('Commencer', self)
         self.start_button.setGeometry(400, 600, 200, 60)
         self.start_button.setStyleSheet("QPushButton {background-color: '#00aeef'; color: '#FFFFFF'; font-weight: bold; border-radius: 30} QPushButton:pressed {background-color: lightblue;}")
         self.start_button.clicked.connect(self.point_thread)
-        self.start_button.clicked.connect(self.show_camera)
+        self.start_button.clicked.connect(self.show_camera)"""
         
 
         #Stop button
         self.stop_button = QPushButton('Arrêter', self)
-        self.stop_button.setGeometry(650, 600, 200, 60)
+        self.stop_button.setGeometry(770, 610, 200, 60)
         self.stop_button.setStyleSheet("QPushButton {background-color: '#00aeef'; color: '#FFFFFF'; font-weight: bold; border-radius: 30} QPushButton:pressed {background-color: lightblue;}")
         self.stop_button.clicked.connect(self.stop_btn)
-        self.stop_button.setEnabled(False)
         
         #thread point
         self.t1 = MyThread(self)
+        self.cam = False
+    
         
-        self.cam = True
-        #video capture
-        #thread cam
-        #self.t2 = threading.Thread(target=self.show_camera, args=())
-        
-
     def goToAutoScreen(self):
         global point
         point = []
@@ -126,14 +149,14 @@ class ManuelWindow(QMainWindow) :
         self.gauche.hide()
         self.haut.hide()
         self.bas.hide()
-        self.manuel_button.setEnabled(True)
-        self.auto_button.setEnabled(False)
-        self.start_button.setEnabled(True)
         if (self.t1.etat == True) : self.t1.stop()
+        else : self.point_thread()
+        if(self.cam == False) : self.show_camera()
     
     def goToManuelScreen(self):
         global point 
         point = []
+        init_manuel()
         self.map.clear()
         self.manuel_button.setStyleSheet("QPushButton {background-color: '#00aeef'; color: '#FFFFFF'; font-weight: bold; border-radius: 30; border :5px solid } QPushButton:pressed {background-color: lightblue;}")
         self.auto_button.setStyleSheet("QPushButton {background-color: '#00aeef'; color: '#FFFFFF'; font-weight: bold; border-radius: 30} QPushButton:pressed {background-color: lightblue;}")
@@ -141,29 +164,20 @@ class ManuelWindow(QMainWindow) :
         self.gauche.show()
         self.haut.show()
         self.bas.show()
-        self.auto_button.setEnabled(True)
-        self.manuel_button.setEnabled(False)
-        self.start_button.setEnabled(True)
         if (self.t1.etat == True) : self.t1.stop()
-    
+        else : self.point_thread()
+        if(self.cam == False) : self.show_camera()
         
     def point_thread(self):
         self.t1 = MyThread(self)
         self.map.clear()
-        self.stop_button.setEnabled(True)
-        self.start_button.setEnabled(False)
         self.t1.start()
-        if(not self.gauche.isHidden()):
-            self.droite.setEnabled(True)
-            self.gauche.setEnabled(True)
-            self.haut.setEnabled(True)
-            self.bas.setEnabled(True)
-        else:
-            deplacement(5)
+        if(self.gauche.isHidden()): #cas auto
+            deplacement(5, self)
+            
         
     def show_camera(self):
         self.cam = True
-        self.stop_button.setEnabled(True)
         while(self.cam):
             self.cap = cv2.VideoCapture(url_cam)  #cam esp
             while(self.cap.isOpened()):
@@ -180,25 +194,21 @@ class ManuelWindow(QMainWindow) :
                         break
                 else:
                     self.cap.release()
+                    self.cam = False
                     cv2.destroyAllWindows()
                     break
         
-        
-        
     def stop_btn(self):
-        self.cam = False
-        self.droite.setEnabled(False)
-        self.gauche.setEnabled(False)
-        self.haut.setEnabled(False)
-        self.bas.setEnabled(False)
         self.t1.stop()
-        self.start_button.setEnabled(True)
-        self.stop_button.setEnabled(False)
-        cv2.destroyAllWindows()
+        init_manuel()
+        
+        self.cam = False
         self.cap.release()
         self.video_display.setText("CAMERA")
         self.video_display.setStyleSheet("background-color: '#FFFFFF';  color: '#00aeef';font-weight: bold;")
-    
+        
+        cv2.destroyAllWindows()
+        
     def closeEvent(self, event):
         self.cam = False
         self.cap.release()
@@ -227,8 +237,6 @@ def recup_coord(pt) : #retour liste couple de coord
                 point_tmp.append((int(X),int(Y)))
                 X = ""
                 Y = ""
-        
-        
     return point_tmp
 
 def affichage_pt(myclass) :
@@ -269,7 +277,7 @@ def affichage_pt(myclass) :
         for pt in point:
             #if (pt is not None) :
             painter.setPen(QPen(QColor('blue'), 5))
-            painter.drawPoint(-pt[0], -pt[1])
+            painter.drawPoint(pt[0], -pt[1])
             
             painter.setPen(QPen(QColor('black'), 9))
             painter.drawPoint(-robot[0][0], -robot[0][1])
@@ -280,23 +288,25 @@ def affichage_pt(myclass) :
     else:
         print("pas de coord")
 
-def deplacement(_dir):
+
+def deplacement(_dir, myclass):
     if (_dir == 1):
-        urlG = "http://192.168.4.1/G"
         requests.get(urlG)
     if (_dir == 2):
-        urlD = "http://192.168.4.1/D"
         requests.get(urlD)
     if (_dir == 3):
-        urlH = "http://192.168.4.1/H"
         requests.get(urlH)
     if (_dir == 4):
-        urlB = "http://192.168.4.1/B"
         requests.get(urlB)
     if (_dir == 5):
-        urlA = "http://192.168.4.1/A"
         requests.get(urlA)
         
+def stop_move() :
+    requests.get(urlS)
+   
+def init_manuel():
+    requests.get(urlM)
+   
 if __name__ == "__main__": 
     app = QApplication(sys.argv)
     styles.dark(app)
