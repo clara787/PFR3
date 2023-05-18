@@ -303,6 +303,7 @@ def deplacement(_dir, myclass):
         
 def stop_move() :
     requests.get(urlS)
+    requests.get(urlS)
    
 def init_manuel():
     requests.get(urlM)
