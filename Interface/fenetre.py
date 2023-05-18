@@ -292,13 +292,18 @@ def affichage_pt(myclass) :
 def deplacement(_dir, myclass):
     if (_dir == 1):
         requests.get(urlG)
+        requests.get(urlG)
     if (_dir == 2):
+        requests.get(urlD)
         requests.get(urlD)
     if (_dir == 3):
         requests.get(urlH)
+        requests.get(urlH)
     if (_dir == 4):
         requests.get(urlB)
+        requests.get(urlB)
     if (_dir == 5):
+        requests.get(urlA)
         requests.get(urlA)
         
 def stop_move() :
@@ -306,6 +311,7 @@ def stop_move() :
     requests.get(urlS)
    
 def init_manuel():
+    requests.get(urlM)
     requests.get(urlM)
    
 if __name__ == "__main__": 
