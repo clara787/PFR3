@@ -243,6 +243,7 @@ def affichage_pt(myclass) :
     global point
     global robot
     """recupération des coordonnées du point"""
+    requests.get(url)
     requete = requests.get(url)
     page = requete.content
     soup = BeautifulSoup(page, features="html.parser")
@@ -277,7 +278,7 @@ def affichage_pt(myclass) :
         for pt in point:
             #if (pt is not None) :
             painter.setPen(QPen(QColor('blue'), 5))
-            painter.drawPoint(pt[0], -pt[1])
+            painter.drawPoint(-pt[0], -pt[1])
             
             painter.setPen(QPen(QColor('black'), 9))
             painter.drawPoint(-robot[0][0], -robot[0][1])
