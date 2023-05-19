@@ -1,6 +1,6 @@
 from PyQt5.QtCore import Qt, QObject
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QPushButton, QApplication, QMainWindow, QWidget
+from PyQt5.QtWidgets import QPushButton, QApplication, QMainWindow, QWidget, QFileDialog
 from qtmodern import styles
 from PyQt5.QtWidgets import QLabel
 from PyQt5.QtGui import QPixmap, QImage, QPainter, QPen, QColor
@@ -82,6 +82,17 @@ class ManuelWindow(QWidget) :
         self.auto_button.setGeometry(990, 80, 200, 60)
         self.auto_button.setStyleSheet("QPushButton {background-color: '#00aeef'; color: '#FFFFFF'; font-weight: bold; border-radius: 30} QPushButton:pressed {background-color: lightblue;}")
         self.auto_button.clicked.connect(self.goToAutoScreen)
+
+        self.charger = QPushButton("Charger",self)
+        self.charger.setGeometry(25, 10, 200, 60)
+        self.charger.setStyleSheet("QPushButton {background-color: '#00aeef'; color: '#FFFFFF'; font-weight: bold; border-radius: 30} QPushButton:pressed {background-color: lightblue;}")
+        self.charger.clicked.connect(self.charge_image)
+        
+        
+        self.save = QPushButton("Enregistrer",self)
+        self.save.setGeometry(25, 80, 200, 60)
+        self.save.setStyleSheet("QPushButton {background-color: '#00aeef'; color: '#FFFFFF'; font-weight: bold; border-radius: 30} QPushButton:pressed {background-color: lightblue;}")
+        self.save.clicked.connect(self.save_image)
         
         self.map = QLabel(self)
         self.map.setAlignment(Qt.AlignCenter)
@@ -134,6 +145,10 @@ class ManuelWindow(QWidget) :
         self.stop_button.setStyleSheet("QPushButton {background-color: '#00aeef'; color: '#FFFFFF'; font-weight: bold; border-radius: 30} QPushButton:pressed {background-color: lightblue;}")
         self.stop_button.clicked.connect(self.stop_btn)
         
+        # Créer une image QPixmap pour le QLabel
+        self.pixmap = QPixmap(self.map.width(), self.map.height())
+        self.pixmap.fill(Qt.white)
+
         #thread point
         self.t1 = MyThread(self)
         self.cam = False
@@ -197,7 +212,22 @@ class ManuelWindow(QWidget) :
                     self.cam = False
                     cv2.destroyAllWindows()
                     break
-        
+    
+    def save_image(self):
+            fileName = QFileDialog.getSaveFileName(self, 'Save File', '', '*.jpg')
+            self.pixmap.save(fileName[0])
+    
+    def charge_image(self):
+        # create a QPixmap object
+        dialog = QFileDialog(self)
+        dialog.setFileMode(QFileDialog.FileMode.ExistingFiles)
+        if dialog.exec_():
+            fileName = dialog.selectedFiles()
+            self.qpixmap = QPixmap(fileName[0])
+            # creat a QLabel for image
+            self.map.setScaledContents(True)
+            self.map.setPixmap(self.qpixmap)
+
     def stop_btn(self):
         self.t1.stop()
         init_manuel()
@@ -267,12 +297,8 @@ def affichage_pt(myclass) :
         X0 = myclass.map.width() - 10
         Y0 = myclass.map.height() - 10
         
-        # Créer une image QPixmap pour le QLabel
-        pixmap = QPixmap(myclass.map.width(), myclass.map.height())
-        pixmap.fill(Qt.white)
-        
         # Dessiner des points sur l'image
-        painter = QPainter(pixmap)
+        painter = QPainter(myclass.pixmap)
         painter.translate(X0, Y0)
         
         for pt in point:
@@ -285,7 +311,7 @@ def affichage_pt(myclass) :
         
         painter.end()
         # Afficher l'image dans le QLabel
-        myclass.map.setPixmap(pixmap)
+        myclass.map.setPixmap(myclass.pixmap)
     else:
         print("pas de coord")
 
