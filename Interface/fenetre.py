@@ -135,8 +135,8 @@ class ManuelWindow(QWidget) :
         """self.start_button = QPushButton('Commencer', self)
         self.start_button.setGeometry(400, 600, 200, 60)
         self.start_button.setStyleSheet("QPushButton {background-color: '#00aeef'; color: '#FFFFFF'; font-weight: bold; border-radius: 30} QPushButton:pressed {background-color: lightblue;}")
-        self.start_button.clicked.connect(self.point_thread)
-        self.start_button.clicked.connect(self.show_camera)"""
+        self.start_button.clicked.connect(self.test_affichage)
+        #self.start_button.clicked.connect(self.show_camera)"""
         
 
         #Stop button
@@ -151,6 +151,7 @@ class ManuelWindow(QWidget) :
 
         #thread point
         self.t1 = MyThread(self)
+        self.cap = cv2.VideoCapture(url_cam)
         self.cam = False
     
         
@@ -192,30 +193,29 @@ class ManuelWindow(QWidget) :
             
         
     def show_camera(self):
-        self.cam = True
-        while(self.cam):
+        while(self.cap.isOpened()):
             self.cap = cv2.VideoCapture(url_cam)  #cam esp
-            while(self.cap.isOpened()):
-                ret, image = self.cap.read()
-                if ret == True:            
-                    # Convert the image to the RGB format that QImage expects
-                    rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-                    # Create a QImage from the RGB image
-                    qImg = QImage(rgb_image.data, rgb_image.shape[1], rgb_image.shape[0], QImage.Format_RGB888)
-                    pixmap = QPixmap.fromImage(qImg)
-                    if self.video_display is not None:
-                        self.video_display.setPixmap(pixmap.scaled(self.video_display.size()))
-                    if  cv2.waitKey(1) == ord('q') :
-                        break
-                else:
-                    self.cap.release()
-                    self.cam = False
-                    cv2.destroyAllWindows()
+            ret, image = self.cap.read()
+            if ret == True:            
+                # Convert the image to the RGB format that QImage expects
+                rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+                # Create a QImage from the RGB image
+                qImg = QImage(rgb_image.data, rgb_image.shape[1], rgb_image.shape[0], QImage.Format_RGB888)
+                pixmap = QPixmap.fromImage(qImg)
+                if self.video_display is not None:
+                    self.video_display.setPixmap(pixmap.scaled(self.video_display.size()))
+                if  cv2.waitKey(1) == ord('q') :
                     break
+            else:
+                self.cap.release()
+                self.cam = False
+                cv2.destroyAllWindows()
+                break
     
+
     def save_image(self):
-            fileName = QFileDialog.getSaveFileName(self, 'Save File', '', '*.jpg')
-            self.pixmap.save(fileName[0])
+        fileName = QFileDialog.getSaveFileName(self, 'Save File', '', '*.jpg')
+        self.pixmap.save(fileName[0])
     
     def charge_image(self):
         # create a QPixmap object
@@ -223,10 +223,10 @@ class ManuelWindow(QWidget) :
         dialog.setFileMode(QFileDialog.FileMode.ExistingFiles)
         if dialog.exec_():
             fileName = dialog.selectedFiles()
-            self.qpixmap = QPixmap(fileName[0])
+            qpixmap = QPixmap(fileName[0])
             # creat a QLabel for image
             self.map.setScaledContents(True)
-            self.map.setPixmap(self.qpixmap)
+            self.map.setPixmap(qpixmap)
 
     def stop_btn(self):
         self.t1.stop()
@@ -272,14 +272,15 @@ def recup_coord(pt) : #retour liste couple de coord
 def affichage_pt(myclass) :
     global point
     global robot
-    """recupération des coordonnées du point"""
-    requests.get(url)
+
+    #recupération des coordonnées du point
+    requests.get(url) #remise à 0 des points sur la page web
     requete = requests.get(url)
     page = requete.content
     soup = BeautifulSoup(page, features="html.parser")
     coord_str = soup.find("h1").text
     
-    """recupération des coordonnées du robot"""
+    #recupération des coordonnées du robot
     requete_robot = requests.get(url_robot)
     page_robot = requete_robot.content
     soup_robot = BeautifulSoup(page_robot, features="html.parser")
@@ -293,19 +294,21 @@ def affichage_pt(myclass) :
         for pt in pt_tmp:
             if (pt is not None):
                 point.append(pt)
-        
         X0 = myclass.map.width() - 10
         Y0 = myclass.map.height() - 10
+        
+        # Réinitialise le qpixmap
+        myclass.pixmap.fill(Qt.white)
         
         # Dessiner des points sur l'image
         painter = QPainter(myclass.pixmap)
         painter.translate(X0, Y0)
         
+    
         for pt in point:
-            #if (pt is not None) :
             painter.setPen(QPen(QColor('blue'), 5))
             painter.drawPoint(-pt[0], -pt[1])
-            
+    
             painter.setPen(QPen(QColor('black'), 9))
             painter.drawPoint(-robot[0][0], -robot[0][1])
         
