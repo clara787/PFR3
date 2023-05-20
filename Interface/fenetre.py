@@ -272,15 +272,13 @@ def recup_coord(pt) : #retour liste couple de coord
 def affichage_pt(myclass) :
     global point
     global robot
-
-    #recupération des coordonnées du point
-    requests.get(url) #remise à 0 des points sur la page web
+    """recupération des coordonnées du point"""
     requete = requests.get(url)
     page = requete.content
     soup = BeautifulSoup(page, features="html.parser")
     coord_str = soup.find("h1").text
     
-    #recupération des coordonnées du robot
+    """recupération des coordonnées du robot"""
     requete_robot = requests.get(url_robot)
     page_robot = requete_robot.content
     soup_robot = BeautifulSoup(page_robot, features="html.parser")
@@ -294,30 +292,31 @@ def affichage_pt(myclass) :
         for pt in pt_tmp:
             if (pt is not None):
                 point.append(pt)
-        X0 = myclass.map.width() - 10
-        Y0 = myclass.map.height() - 10
         
-        # Réinitialise le qpixmap
-        myclass.pixmap.fill(Qt.white)
+        X0 = myclass.map.width()
+        Y0 = myclass.map.height()
+        
+        # Créer une image QPixmap pour le QLabel
+        pixmap = QPixmap(myclass.map.width(), myclass.map.height())
+        pixmap.fill(Qt.white)
         
         # Dessiner des points sur l'image
-        painter = QPainter(myclass.pixmap)
+        painter = QPainter(pixmap)
         painter.translate(X0, Y0)
         
-    
         for pt in point:
             painter.setPen(QPen(QColor('blue'), 5))
-            painter.drawPoint(-pt[0], -pt[1])
-    
+            painter.drawPoint(pt[0], -pt[1])
+            
             painter.setPen(QPen(QColor('black'), 9))
             painter.drawPoint(-robot[0][0], -robot[0][1])
         
         painter.end()
         # Afficher l'image dans le QLabel
-        myclass.map.setPixmap(myclass.pixmap)
+        myclass.map.setPixmap(pixmap)
+        myclass.pixmap = pixmap
     else:
         print("pas de coord")
-
 
 def deplacement(_dir, myclass):
     if (_dir == 1):
