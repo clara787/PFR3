@@ -1,5 +1,6 @@
 #include "capteur.h"
 #include <Math.h>
+#include <Arduino.h>
 #include "OpticalEncodersLib.h"
 #include "espcom.h"
 #include "positionLib.h"
@@ -13,7 +14,7 @@ float temps = 1;
 Ultrasonic ultrasonicAvant(9, 10); // Trig et Echo
 Ultrasonic ultrasonicWall(11, 12); // Trig et Echo
 
-boolean ObstacleHere(){
+bool ObstacleHere(){
   int dist = ultrasonicAvant.Ranging(CM);
   return(dist <= 19);
 }
@@ -27,20 +28,25 @@ void Scan(){
   int dist = Wall();
   int x = getPositionX();
   int y = getPositionY();
-
-  sendPosRobot(x,y);
-
-  x = dist * cos(getAngle()) + x;
-  y = dist * sin(getAngle()) + y;
-  sendPoint(x,y);
+  
+  Serial.println("debut");
+  Serial.println(x);
+  Serial.println(y);
+  Serial.println(roverRotation());
+  Serial.println(roverRotation() * 57.32);
+  sendPosRobot(x/5,y/5);
+  x = dist * -cos(roverRotation()) + x;
+  y = dist * -sin(roverRotation()) + y;
+  Serial.println(x);
+  Serial.println(y);
+  sendPoint(x/5,y/5);
 }
 
 void majAngle(){
   if(isStraight())
-    offset = analogRead(A5);
+    offset = analogRead(A0);
   else{
-  
-    vitesse = analogRead(A5) - offset;
+    vitesse = analogRead(A0) - offset;
     if(abs(vitesse)>=10)
       pos += vitesse * temps;
       angle_cap = pos * 0.45;
@@ -48,5 +54,6 @@ void majAngle(){
 }
 
 float getAngle(){
-    return angle_cap + 90;
+    return angle_cap;
 }
+

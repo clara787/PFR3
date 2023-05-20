@@ -69,27 +69,32 @@ bool isStraight(){
 //Renvoie une valeur négative si tourne à gauche      
 //        une valeur positive si tourne à droite
 //        0 sinon
+float rotationAngle = 0;
 float roverRotation(){
-  float rotationAngle;
+  //float rotationAngle;
 
   //Le robot tourne à gauche
   if(leftCounter < 0 && rightCounter > 0){
     float distance = counterToCm(rightCounter);
-    rotationAngle = -(distance / ROVER_RADIUS) * 180 / PI;  //Calcul rotation rover (en degré)
+    rotationAngle -= (distance / ROVER_RADIUS);  //Calcul rotation rover (en degré)
   }
 
   //Le robot tourne à droite
   else if(leftCounter > 0 && rightCounter < 0){
     float distance = counterToCm(leftCounter);
-    rotationAngle = (distance / ROVER_RADIUS) * 180 / PI; //Calcul rotation rover (en degré)
+    rotationAngle += (distance / ROVER_RADIUS); //Calcul rotation rover (en degré)
   }
 
   //Le robot avance ou recule
-  else{
-    rotationAngle = 0;
-  }
+  //else{
+  //  rotationAngle = 0;
+  //}
 
-  return rotationAngle;
+  return rotationAngle/3;
+}
+
+void razAngle(){
+  rotationAngle = 0;
 }
 
 //Fonction 

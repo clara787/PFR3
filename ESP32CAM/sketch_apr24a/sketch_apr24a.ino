@@ -23,6 +23,7 @@ WebServer server(80);
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
+  while(!Serial);
 
   WiFi.mode(WIFI_AP);
   WiFi.softAP(ssid, password);

@@ -32,4 +32,6 @@ float roverRotation();
 //boolean isTurning();
 bool isStraight();
 
+void razAngle();
+
 #endif

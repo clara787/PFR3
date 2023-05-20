@@ -4,11 +4,12 @@
 #include "espcom.h"
 #include "positionLib.h"
 #include "OpticalEncodersLib.h"
+#include "positionLib.h"
 
 #define rxPin 19
 #define txPin 18
 
-int mode = 1;
+int mode = 2;
 int mouvement = 0;
 unsigned char Button;
 int distanceMur;
@@ -20,7 +21,7 @@ int X = 0;
 int Y = 0;
 float angle;
 unsigned long previousMillis = 0;
-unsigned long interval = 1000;
+unsigned long interval = 100;
 
 // Set up a new SoftwareSerial object
 
@@ -32,29 +33,33 @@ void setup() {
     Serial.begin(9600);
     initRover();
     setup_ESPCOM();
+    initEncoders();
 }
 
 void loop(){
   unsigned long currentMillis = millis();
   if(currentMillis - previousMillis >= interval){
     previousMillis = millis();
-    Update();
     Scan();
+    Update();
   }
-  // put your main code here, to run repeatedly:
-  distanceMur = Wall();
-  presencePre = presence;
-  presence = ObstacleHere();
+
+  if(mode==1){
+    distanceMur = Wall();
+    presencePre = presence;
+    presence = ObstacleHere();
+  }
   Button = getCharacterESP();
   if (Button == 'A') mode = 1;
-  if (Button == 'M') mode = 2;
-
-  Serial.println(presence&&presencePre);
-  
+  if (Button == 'M'){
+    mode = 2;
+    razAngle();
+    razPos();
+  }
   if (mode==1) ModeAuto();
   else if (mode==2) ModeManuel();
 
-
+  
   
   //if(mouvement == 0) angle = getAngle();
   //else if (abs(getAngle() - angle) >=85) mouvement = 0;
@@ -63,20 +68,20 @@ void loop(){
 
 
 void ModeAuto(){
-        if((distanceMur<=20)&& !(presence&&presencePre)){
-           avanceGauche(162);
-        }
-        if(presence&&presencePre){
-           // mouvement = 1;
-           reculerTOR();
-           delay(100);
-            tournerGauche(175);
-            delay(480);
-        }
-        if (distanceMur>=20){
-         avanceDroite(162);
-         //mouvement = 2;
-        }
+  if((distanceMur<=20)&& !(presence&&presencePre)){
+    avanceGauche(162);
+  }
+  if(presence&&presencePre){
+    // mouvement = 1;
+    reculerTOR();
+    delay(100);
+    tournerGauche(175);
+    delay(480);
+  }
+  if (distanceMur>=20){
+    avanceDroite(162);
+    //mouvement = 2;
+  }
 }
 
 int mode_Manuel=0;
@@ -103,6 +108,6 @@ void ModeManuel(){
 }
 
 void Update(){
-  //newPosition();
-  //majAngle();
+  newPosition();
+  majAngle();
 }
