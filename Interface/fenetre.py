@@ -135,8 +135,8 @@ class ManuelWindow(QWidget) :
         """self.start_button = QPushButton('Commencer', self)
         self.start_button.setGeometry(400, 600, 200, 60)
         self.start_button.setStyleSheet("QPushButton {background-color: '#00aeef'; color: '#FFFFFF'; font-weight: bold; border-radius: 30} QPushButton:pressed {background-color: lightblue;}")
-        self.start_button.clicked.connect(self.test_affichage)
-        #self.start_button.clicked.connect(self.show_camera)"""
+        self.start_button.clicked.connect(lambda : test_affichage(self))"""
+        #self.start_button.clicked.connect(self.show_camera)
         
 
         #Stop button
@@ -151,7 +151,7 @@ class ManuelWindow(QWidget) :
 
         #thread point
         self.t1 = MyThread(self)
-        self.cap = cv2.VideoCapture(url_cam)
+        #self.cap = cv2.VideoCapture(url_cam)
         self.cam = False
     
         
@@ -245,7 +245,33 @@ class ManuelWindow(QWidget) :
         self.t1.stop()
         event.accept()
         
-
+"""def test_affichage(myclass):
+    point = [(10,10), (10,20), (10,30), (10,40)]
+    robot = [(10,10)]
+    X0 = myclass.map.width()
+    Y0 = myclass.map.height()
+    for i in range(6):
+        # Créer une image QPixmap pour le QLabel
+        pixmap = QPixmap(myclass.map.width(), myclass.map.height())
+        pixmap.fill(Qt.white)
+        
+        # Dessiner des points sur l'image
+        painter = QPainter(pixmap)
+        painter.translate(X0, Y0)
+        
+        for pt in point:
+            painter.setPen(QPen(QColor('blue'), 5))
+            painter.drawPoint(-pt[0], -pt[1])
+            
+            painter.setPen(QPen(QColor('black'), 9))
+            painter.drawPoint(-robot[0][0], -robot[0][1])
+        
+        painter.end()
+        # Afficher l'image dans le QLabel
+        myclass.map.setPixmap(pixmap)
+        y = robot[0][1] + 10
+        robot = [(10, y)]
+    myclass.pixmap = pixmap"""
             
 def recup_coord(pt) : #retour liste couple de coord
     point_tmp = []
@@ -306,7 +332,7 @@ def affichage_pt(myclass) :
         
         for pt in point:
             painter.setPen(QPen(QColor('blue'), 5))
-            painter.drawPoint(pt[0], -pt[1])
+            painter.drawPoint(-pt[0], -pt[1])
             
             painter.setPen(QPen(QColor('black'), 9))
             painter.drawPoint(-robot[0][0], -robot[0][1])
