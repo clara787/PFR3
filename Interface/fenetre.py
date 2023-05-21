@@ -1,6 +1,6 @@
 from PyQt5.QtCore import Qt, QObject
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QPushButton, QApplication, QMainWindow, QWidget, QFileDialog
+from PyQt5.QtWidgets import QPushButton, QApplication, QMainWindow, QWidget, QFileDialog, QMessageBox
 from qtmodern import styles
 from PyQt5.QtWidgets import QLabel
 from PyQt5.QtGui import QPixmap, QImage, QPainter, QPen, QColor
@@ -44,30 +44,6 @@ class MyThread(threading.Thread):
         self.stop_flag.set()
         self.etat = False
 
-"""class KeyPressFilter(QObject):
-    def __init__(self, parent):
-        super().__init__(parent)
-
-    def eventFilter(self, obj, event):
-        if event.type() == event.KeyPress:
-            if event.key() == Qt.Key_Up:
-                deplacement(3, self)
-                return True
-            elif event.key() == Qt.Key_Down:
-                deplacement(4, self)
-                return True
-            elif event.key() == Qt.Key_Left:
-                deplacement(1, self)
-                return True
-            elif event.key() == Qt.Key_Right:
-                deplacement(2, self)
-                return True
-        if event.type() == event.KeyRelease:
-            stop_move()
-            return True
-        return False"""
-
-
 class ManuelWindow(QWidget) :
     def __init__(self):
         super(ManuelWindow,self).__init__()
@@ -76,14 +52,13 @@ class ManuelWindow(QWidget) :
         self.manuel_button.setGeometry(990, 10, 200, 60)
         self.manuel_button.setStyleSheet("QPushButton {background-color: '#00aeef'; color: '#FFFFFF'; font-weight: bold; border-radius: 30} QPushButton:pressed {background-color: lightblue;}")
         self.manuel_button.clicked.connect(self.goToManuelScreen)
-        #self.manuel_button.installEventFilter(KeyPressFilter(self))
         
         self.auto_button = QPushButton("Automatique",self)
         self.auto_button.setGeometry(990, 80, 200, 60)
         self.auto_button.setStyleSheet("QPushButton {background-color: '#00aeef'; color: '#FFFFFF'; font-weight: bold; border-radius: 30} QPushButton:pressed {background-color: lightblue;}")
         self.auto_button.clicked.connect(self.goToAutoScreen)
 
-        self.charger = QPushButton("Charger",self)
+        self.charger = QPushButton("Charger image",self)
         self.charger.setGeometry(25, 10, 200, 60)
         self.charger.setStyleSheet("QPushButton {background-color: '#00aeef'; color: '#FFFFFF'; font-weight: bold; border-radius: 30} QPushButton:pressed {background-color: lightblue;}")
         self.charger.clicked.connect(self.charge_image)
@@ -135,8 +110,8 @@ class ManuelWindow(QWidget) :
         """self.start_button = QPushButton('Commencer', self)
         self.start_button.setGeometry(400, 600, 200, 60)
         self.start_button.setStyleSheet("QPushButton {background-color: '#00aeef'; color: '#FFFFFF'; font-weight: bold; border-radius: 30} QPushButton:pressed {background-color: lightblue;}")
-        self.start_button.clicked.connect(lambda : test_affichage(self))"""
-        #self.start_button.clicked.connect(self.show_camera)
+        self.start_button.clicked.connect(self.point_thread)
+        self.start_button.clicked.connect(self.show_camera)"""
         
 
         #Stop button
@@ -154,6 +129,18 @@ class ManuelWindow(QWidget) :
         self.cap = cv2.VideoCapture(url_cam)
         self.cam = False
     
+    def closeEvent(self, event):
+        reply = QMessageBox.question(self, 'Window Close', 'Are you sure you want to close the window?',
+				QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        
+        if reply == QMessageBox.Yes:
+             self.cam = False
+             self.cap.release()
+             self.t1.stop()
+             event.accept()
+             print('Window closed')
+        else:
+            event.ignore()
         
     def goToAutoScreen(self):
         global point
@@ -193,6 +180,7 @@ class ManuelWindow(QWidget) :
             
         
     def show_camera(self):
+        self.cam = True
         while(self.cap.isOpened()):
             self.cap = cv2.VideoCapture(url_cam)  #cam esp
             ret, image = self.cap.read()
@@ -238,12 +226,6 @@ class ManuelWindow(QWidget) :
         self.video_display.setStyleSheet("background-color: '#FFFFFF';  color: '#00aeef';font-weight: bold;")
         
         cv2.destroyAllWindows()
-        
-    def closeEvent(self, event):
-        self.cam = False
-        self.cap.release()
-        self.t1.stop()
-        event.accept()
             
 def recup_coord(pt) : #retour liste couple de coord
     point_tmp = []
@@ -260,9 +242,12 @@ def recup_coord(pt) : #retour liste couple de coord
                 Y += pt[i]
                 i+=1
             if pt[i] == "F" :
-                X = float(X)
-                Y = float(Y)
-                point_tmp.append((int(X),int(Y)))
+                try:
+                    X = float(X)
+                    Y = float(Y)
+                    point_tmp.append((int(X),int(Y)))
+                except:
+                    print("Erreur de lecture")
                 X = ""
                 Y = ""
     return point_tmp
@@ -345,19 +330,10 @@ def init_manuel():
 if __name__ == "__main__": 
     app = QApplication(sys.argv)
     styles.dark(app)
-    widget = QtWidgets.QStackedWidget()
-
     """exection de la fenêtre principale"""
     window = ManuelWindow()
-    widget.addWidget(window)
-    widget.resize(1200,800)
-    widget.setWindowTitle("Robot")
-    widget.show()
+    window.resize(1200,800)
+    window.setWindowTitle("Robot")
+    window.show()
     
-    
-    app.exec_()
-    app.exit()
-    
-#At the end, free the webcam and the video capture
-#cap.release()
-cv2.destroyAllWindows()
+    sys.exit(app.exec_())
