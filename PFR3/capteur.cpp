@@ -1,3 +1,8 @@
+//################################################################################
+//#Auteur: SAIDI Rahim                                                           #
+//#Fonction: Cette bibliothèque permet de faire marcher les capteurs             #
+//#                                                                              #
+//################################################################################
 #include "capteur.h"
 #include <Math.h>
 #include <Arduino.h>

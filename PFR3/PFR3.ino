@@ -1,4 +1,8 @@
-
+//################################################################################
+//#Auteur: TRAORE Mamadou                                                        #
+//#Fonction: Code Principal de l'Arduino                                         #
+//#                                                                              #
+//################################################################################
 #include "capteur.h"
 #include "RoverMotorsLib.h"
 #include "espcom.h"
