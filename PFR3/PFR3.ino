@@ -6,12 +6,9 @@
 #include "OpticalEncodersLib.h"
 #include "positionLib.h"
 
-#define rxPin 19
-#define txPin 18
 
 int mode = 2;
 int modeTrace = 0;
-int mouvement = 0;
 unsigned char Button;
 int distanceMur;
 int count =0;
@@ -27,9 +24,7 @@ unsigned long interval = 100;
 // Set up a new SoftwareSerial object
 
 void setup() {
-  // initialize the serial communications:
-    //pinMode(rxPin, INPUT);
-    //pinMode(txPin, OUTPUT);
+    // initialize the serial communications:
     // Set the baud rate for the SoftwareSerial object
     Serial.begin(9600);
     initRover();
@@ -38,6 +33,7 @@ void setup() {
 }
 
 void loop(){
+  //Envoie les coordonnées du Robot à l'ESP périodiquement
   unsigned long currentMillis = millis();
   if(currentMillis - previousMillis >= interval){
     previousMillis = millis();
@@ -60,22 +56,23 @@ void loop(){
   }
   if (mode==1) ModeAuto();
   else if (mode==2) ModeManuel();
-
-  //if(mouvement == 0) angle = getAngle();
-  //else if (abs(getAngle() - angle) >=85) mouvement = 0;
   
 }
 
-
+// Fonction du mode automatique du robot
 void ModeAuto(){
   //if(modeTrace == 0 && (getPositionX()>510 || getPositionX()<490) && (getPositionY()>510 || getPositionY()<490))modeTrace=1;
   //if(modeTrace == 1 && (getPositionX()<510 && getPositionX()>490) && (getPositionY()<510 || getPositionY()>490)){
   //  modeTrace = 0;
   //  mode = 2;
   //}
-  if((distanceMur<=20)&& !(presence&&presencePre)){
+
+  // Avance en tournant légèrement vers la gauche en présence d'un mur
+  if((distanceMur<=16)&& !(presence&&presencePre)){
     avanceGauche(162);
   }
+
+  //Tourne à gauche lorsqu'un obstacle est en face
   if(presence&&presencePre){
     // mouvement = 1;
     reculerTOR();
@@ -83,13 +80,17 @@ void ModeAuto(){
     tournerGauche(175);
     delay(550);
   }
-  if (distanceMur>=20){
+   // Avance en tournant vers la droite lorsque le mur est un peu éloigné
+  if (distanceMur>=16 && distanceMur<=25){
     avanceDroite(162);
-    //mouvement = 2;
+  }
+  else if (distanceMur>=25){
+    avanceDroiteTOR();
   }
 }
 
 int mode_Manuel=0;
+// Le mode manuel reçoit une direction de l'ESP et le robot se déplace en fonction du signal reçu
 void ModeManuel(){
     if(Button == 'B')mode_Manuel = 4;
     if(Button == 'H')mode_Manuel = 3;

@@ -18,6 +18,7 @@ void avancer(int vitesse);
 void avanceDroite(int vitesse);
 void avanceGauche(int vitesse);
 void avancerTOR();
+void avanceDroiteTOR();
 
 //Fonctions reculer
 void reculer(int vitesse);

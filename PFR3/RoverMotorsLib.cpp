@@ -25,14 +25,19 @@ void avancer(int vitesse){
 
 //Fonction avancer un peu vers la droite
 void avanceDroite(int vitesse){
-  servoGauche.writeMicroseconds(map(vitesse+42, 0, 255, 1550, 1000));
+  servoGauche.writeMicroseconds(map(vitesse+50, 0, 255, 1550, 1000));
   servoDroite.writeMicroseconds(map(vitesse, 0, 255, 1550, 1000));
+}
+
+void avanceDroiteTOR(){
+  servoGauche.writeMicroseconds(map(190, 0, 255, 1550, 1000));
+  servoDroite.writeMicroseconds(map(50, 0, 255, 1550, 1000));
 }
 
 //Fonction avancer un peu vers la gauche
 void avanceGauche(int vitesse){
   servoGauche.writeMicroseconds(map(vitesse, 0, 255, 1550, 1000));
-  servoDroite.writeMicroseconds(map(vitesse+42, 0, 255, 1550, 1000));
+  servoDroite.writeMicroseconds(map(vitesse+50, 0, 255, 1550, 1000));
 }
 
 //Fonction avancer Tout Ou Rien
