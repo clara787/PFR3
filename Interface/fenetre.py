@@ -1,6 +1,5 @@
-from PyQt5.QtCore import Qt, QObject
-from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QPushButton, QApplication, QMainWindow, QWidget, QFileDialog, QMessageBox
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QPushButton, QApplication, QWidget, QFileDialog, QMessageBox
 from qtmodern import styles
 from PyQt5.QtWidgets import QLabel
 from PyQt5.QtGui import QPixmap, QImage, QPainter, QPen, QColor
@@ -13,6 +12,7 @@ import time
 
 
 """---------------------------------Var globales-----------------------------------"""
+#tous les url utiles pour les requetes
 url = "http://192.168.4.1"
 urlG = "http://192.168.4.1/G"
 urlD = "http://192.168.4.1/D"
@@ -24,30 +24,39 @@ url_cam = "http://192.168.4.1/image"
 urlS = "http://192.168.4.1/S"
 urlM = "http://192.168.4.1/M"
 
+#liste des coord mur
 point = []
+#position robot
 robot = [(0,0)]
-"""---------------------------------Fenêtre principale du logiciel--------------------------------------"""
+
+
+"""---------------------------------Thread mapping--------------------------------------"""
 class MyThread(threading.Thread):
     def __init__(self, my_class_instance):
         super().__init__()
         self.stop_flag = threading.Event()
         self.my_class_instance = my_class_instance
         self.etat = False
-
+    
+    #lancement thread
     def run(self):
         while not self.stop_flag.is_set():
             self.etat = True
+            #appel à la fonction pour afficher
             affichage_pt(self.my_class_instance)
-            #time.sleep(1)
-
+            
+    #stop thread
     def stop(self):
         self.stop_flag.set()
         self.etat = False
 
+
+"""---------------------------------Fenêtre principale du logiciel--------------------------------------"""
 class ManuelWindow(QWidget) :
     def __init__(self):
         super(ManuelWindow,self).__init__()
         
+        """OBJETS ET BOUTONS FENETRE"""
         self.manuel_button = QPushButton("Manuel",self)
         self.manuel_button.setGeometry(990, 10, 200, 60)
         self.manuel_button.setStyleSheet("QPushButton {background-color: '#00aeef'; color: '#FFFFFF'; font-weight: bold; border-radius: 30} QPushButton:pressed {background-color: lightblue;}")
@@ -129,6 +138,8 @@ class ManuelWindow(QWidget) :
         self.cap = cv2.VideoCapture(url_cam)
         self.cam = False
     
+    
+    """FERMETURE FENETRE"""
     def closeEvent(self, event):
         reply = QMessageBox.question(self, 'Window Close', 'Are you sure you want to close the window?',
 				QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
@@ -141,13 +152,15 @@ class ManuelWindow(QWidget) :
              print('Window closed')
         else:
             event.ignore()
-        
+    
+    #settings du mode auto
     def goToAutoScreen(self):
         global point
         point = []
         self.map.clear()
         self.auto_button.setStyleSheet("QPushButton {background-color: '#00aeef'; color: '#FFFFFF'; font-weight: bold; border-radius: 30; border :5px solid } QPushButton:pressed {background-color: lightblue;}")
         self.manuel_button.setStyleSheet("QPushButton {background-color: '#00aeef'; color: '#FFFFFF'; font-weight: bold; border-radius: 30} QPushButton:pressed {background-color: lightblue;}")
+        #caher les boutons
         self.droite.hide()
         self.gauche.hide()
         self.haut.hide()
@@ -155,7 +168,9 @@ class ManuelWindow(QWidget) :
         if (self.t1.etat == True) : self.t1.stop()
         else : self.point_thread()
         if(self.cam == False) : self.show_camera()
-    
+        
+        
+    #settings du mode manuel
     def goToManuelScreen(self):
         global point 
         point = []
@@ -170,7 +185,8 @@ class ManuelWindow(QWidget) :
         if (self.t1.etat == True) : self.t1.stop()
         else : self.point_thread()
         if(self.cam == False) : self.show_camera()
-        
+    
+    #lancement du thread et enventuellement du mode auto
     def point_thread(self):
         self.t1 = MyThread(self)
         self.map.clear()
@@ -178,16 +194,15 @@ class ManuelWindow(QWidget) :
         if(self.gauche.isHidden()): #cas auto
             deplacement(5, self)
             
-        
+    #lecture flux cam
     def show_camera(self):
         self.cam = True
         while(self.cap.isOpened()):
             self.cap = cv2.VideoCapture(url_cam)  #cam esp
             ret, image = self.cap.read()
             if ret == True:            
-                # Convert the image to the RGB format that QImage expects
+                # Convertion image en RGB pour le QImage
                 rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-                # Create a QImage from the RGB image
                 qImg = QImage(rgb_image.data, rgb_image.shape[1], rgb_image.shape[0], QImage.Format_RGB888)
                 pixmap = QPixmap.fromImage(qImg)
                 if self.video_display is not None:
@@ -202,32 +217,45 @@ class ManuelWindow(QWidget) :
     
 
     def save_image(self):
+        #recuperation nom du fichier a sauvegarder
         fileName = QFileDialog.getSaveFileName(self, 'Save File', '', '*.jpg')
+        #sauvegarde
         self.pixmap.save(fileName[0])
     
     def charge_image(self):
-        # create a QPixmap object
+        #ouverture explorateur de fichier
         dialog = QFileDialog(self)
         dialog.setFileMode(QFileDialog.FileMode.ExistingFiles)
         if dialog.exec_():
+            #choisir nom fichier
             fileName = dialog.selectedFiles()
             qpixmap = QPixmap(fileName[0])
-            # creat a QLabel for image
+            #mise a l'echelle dansla map et application avec setPixamp
             self.map.setScaledContents(True)
             self.map.setPixmap(qpixmap)
 
     def stop_btn(self):
-        self.t1.stop()
-        init_manuel()
+        self.t1.stop() #stop mapping
+        init_manuel() #appel manuel pour stopper mode auto
         
+        #reinitialisation camera
         self.cam = False
         self.cap.release()
         self.video_display.setText("CAMERA")
         self.video_display.setStyleSheet("background-color: '#FFFFFF';  color: '#00aeef';font-weight: bold;")
         
         cv2.destroyAllWindows()
-            
-def recup_coord(pt) : #retour liste couple de coord
+
+"""---------------------------------Fonctions--------------------------------------"""
+
+"""
+--------------------------------------------------------------
+fonction qui met en forme les coordonnées reçues de l'ESP
+input : string des coord de l'esp
+output : liste de couple de coord int
+--------------------------------------------------------------
+"""
+def recup_coord(pt) :
     point_tmp = []
     X = ""
     Y = ""
@@ -242,6 +270,7 @@ def recup_coord(pt) : #retour liste couple de coord
                 Y += pt[i]
                 i+=1
             if pt[i] == "F" :
+                #try except pour valeurs erronées
                 try:
                     X = float(X)
                     Y = float(Y)
@@ -252,6 +281,14 @@ def recup_coord(pt) : #retour liste couple de coord
                 Y = ""
     return point_tmp
 
+
+"""
+--------------------------------------------------------------
+fonction qui affiche les points du mur et du robot sur la map
+input : class principale pour appeler les attributs de la classe
+output : void
+--------------------------------------------------------------
+"""
 def affichage_pt(myclass) :
     global point
     global robot
@@ -297,12 +334,22 @@ def affichage_pt(myclass) :
         painter.end()
         # Afficher l'image dans le QLabel
         myclass.map.setPixmap(pixmap)
+        #appliquer le nouveau pixmap à celui de la classe
         myclass.pixmap = pixmap
     else:
         print("pas de coord")
 
+
+"""
+--------------------------------------------------------------
+fonction qui permet les déplacements
+input : int pour le type de déplacement et class principale pour appeler les attributs de la classe
+output : void
+--------------------------------------------------------------
+"""
 def deplacement(_dir, myclass):
     if (_dir == 1):
+        #double requete pour etre sur de transmettre l'info
         requests.get(urlG)
         requests.get(urlG)
     if (_dir == 2):
@@ -317,12 +364,13 @@ def deplacement(_dir, myclass):
     if (_dir == 5):
         requests.get(urlA)
         requests.get(urlA)
-        
+
+#stop move dans le mode manuel au release du bouton
 def stop_move() :
     requests.get(urlS)
     time.sleep(0.1)
     requests.get(urlS)
-   
+
 def init_manuel():
     requests.get(urlM)
     requests.get(urlM)
