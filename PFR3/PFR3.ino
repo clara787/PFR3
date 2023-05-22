@@ -7,7 +7,7 @@
 #include "positionLib.h"
 
 
-int mode = 2;
+int mode = 1;
 int modeTrace = 0;
 unsigned char Button;
 int distanceMur;
@@ -68,20 +68,19 @@ void ModeAuto(){
   //}
 
   // Avance en tournant légèrement vers la gauche en présence d'un mur
-  if((distanceMur<=16)&& !(presence&&presencePre)){
+  if((distanceMur<=18)&& !(presence&&presencePre)){
     avanceGauche(162);
   }
 
   //Tourne à gauche lorsqu'un obstacle est en face
   if(presence&&presencePre){
-    // mouvement = 1;
-    reculerTOR();
-    delay(100);
+    angle = roverRotation();
+    while(abs(roverRotation()-angle)<=95){
     tournerGauche(175);
-    delay(550);
+    }
   }
    // Avance en tournant vers la droite lorsque le mur est un peu éloigné
-  if (distanceMur>=16 && distanceMur<=25){
+  if (distanceMur>=18 && distanceMur<=25){
     avanceDroite(162);
   }
   else if (distanceMur>=25){
