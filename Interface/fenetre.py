@@ -1,3 +1,7 @@
+"""
+AUTEUR : BAFFOGNE Clara
+FONTION : interface graphique python avec PyQt5
+"""
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QPushButton, QApplication, QWidget, QFileDialog, QMessageBox
 from qtmodern import styles
@@ -28,7 +32,6 @@ urlM = "http://192.168.4.1/M"
 point = []
 #position robot
 robot = [(0,0)]
-
 
 """---------------------------------Thread mapping--------------------------------------"""
 class MyThread(threading.Thread):
@@ -188,6 +191,7 @@ class ManuelWindow(QWidget) :
     
     #lancement du thread et enventuellement du mode auto
     def point_thread(self):
+        requests.get(url) #remettre a 0 les coordonnées
         self.t1 = MyThread(self)
         self.map.clear()
         self.t1.start()
@@ -230,7 +234,7 @@ class ManuelWindow(QWidget) :
             #choisir nom fichier
             fileName = dialog.selectedFiles()
             qpixmap = QPixmap(fileName[0])
-            #mise a l'echelle dansla map et application avec setPixamp
+            #mise a l'echelle dans la map et application avec setPixamp
             self.map.setScaledContents(True)
             self.map.setPixmap(qpixmap)
 
@@ -261,14 +265,20 @@ def recup_coord(pt) :
     Y = ""
     for i in range (0,len(pt)) :
         if pt[i] == "X" :
-            i+=1
+            i+=1 #passer le X
             while pt[i] != "Y":
                 X += pt[i]
                 i+=1
-            i+=1
+                if i == len(pt)-1 :
+                    pt = pt + "Y"
+                    break
+            i+=1 #passer le Y
             while pt[i] != "F" :
                 Y += pt[i]
                 i+=1
+                if i == len(pt)-1 :
+                    pt = pt + "F"
+                    break
             if pt[i] == "F" :
                 #try except pour valeurs erronées
                 try:
@@ -276,7 +286,7 @@ def recup_coord(pt) :
                     Y = float(Y)
                     point_tmp.append((int(X),int(Y)))
                 except:
-                    print("Erreur de lecture")
+                    print("Erreur de lecture : X = ", X, " Y = ", Y)
                 X = ""
                 Y = ""
     return point_tmp
@@ -292,6 +302,7 @@ output : void
 def affichage_pt(myclass) :
     global point
     global robot
+
     """recupération des coordonnées du point"""
     requete = requests.get(url)
     page = requete.content
@@ -302,8 +313,9 @@ def affichage_pt(myclass) :
     requete_robot = requests.get(url_robot)
     page_robot = requete_robot.content
     soup_robot = BeautifulSoup(page_robot, features="html.parser")
-    coord_str_robot = soup_robot.find("h1").text
-
+    coord_str_robot = ""
+    if(soup_robot.find("h1") is not None):
+        coord_str_robot = soup_robot.find("h1").text
     if (not coord_str == "") :
         pt_tmp = recup_coord(coord_str)
         if (not coord_str_robot == "") :
@@ -328,8 +340,9 @@ def affichage_pt(myclass) :
             painter.setPen(QPen(QColor('blue'), 5))
             painter.drawPoint(-pt[0], -pt[1])
             
-            painter.setPen(QPen(QColor('black'), 9))
-            painter.drawPoint(-robot[0][0], -robot[0][1])
+            if (robot) :
+                painter.setPen(QPen(QColor('black'), 9))
+                painter.drawPoint(-robot[0][0], -robot[0][1])
         
         painter.end()
         # Afficher l'image dans le QLabel
@@ -338,7 +351,6 @@ def affichage_pt(myclass) :
         myclass.pixmap = pixmap
     else:
         print("pas de coord")
-
 
 """
 --------------------------------------------------------------
