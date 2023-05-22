@@ -1,3 +1,9 @@
+/*
+ * PROJET FIL ROUGE PARTIE 3
+ * AUTEUR : Marc GUEDON
+ * ROLE : Librairie pour l'utilisation des moteurs
+ */ 
+
 #include <Servo.h>
 #include <Arduino.h>
 #include "RoverMotorsLib.h"
@@ -5,6 +11,7 @@
 Servo servoGauche;
 Servo servoDroite;
 
+//Fonction initialisation moteurs
 void initRover(){
   servoGauche.attach(LEFT_MOTORS_PIN);
   servoDroite.attach(RIGHT_MOTORS_PIN);
@@ -16,10 +23,32 @@ void avancer(int vitesse){
   servoDroite.writeMicroseconds(map(vitesse, 0, 255, 1550, 1000));
 }
 
+//Fonction avancer un peu vers la droite
+void avanceDroite(int vitesse){
+  servoGauche.writeMicroseconds(map(vitesse+42, 0, 255, 1550, 1000));
+  servoDroite.writeMicroseconds(map(vitesse, 0, 255, 1550, 1000));
+}
+
+//Fonction avancer un peu vers la gauche
+void avanceGauche(int vitesse){
+  servoGauche.writeMicroseconds(map(vitesse, 0, 255, 1550, 1000));
+  servoDroite.writeMicroseconds(map(vitesse+42, 0, 255, 1550, 1000));
+}
+
+//Fonction avancer Tout Ou Rien
+void avancerTOR(){
+  avancer(255);
+}
+
 //Fonction reculer avec choix vitesse (entre 0 et 255)
 void reculer(int vitesse){
   servoGauche.writeMicroseconds(map(vitesse, 0, 255, 1550, 2000));
   servoDroite.writeMicroseconds(map(vitesse, 0, 255, 1550, 2000));
+}
+
+//Fonction reculer Tout Ou Rien
+void reculerTOR(){
+  reculer(255);
 }
 
 //Fonction tourner à gauche (sur place) avec choix vitesse (entre 0 et 255)
@@ -38,26 +67,4 @@ void tournerDroite(int vitesse){
 void stop(){
   servoGauche.writeMicroseconds(1550);
   servoDroite.writeMicroseconds(1550);
-}
-
-//Fonction avancer Tout Ou Rien
-void avancerTOR(){
-  avancer(255);
-}
-
-//Fonction reculer Tout Ou Rien
-void reculerTOR(){
-  reculer(255);
-}
-
-//Fonction avancer un peu vers la droite
-void avanceDroite(int vitesse){
-  servoGauche.writeMicroseconds(map(vitesse+42, 0, 255, 1550, 1000));
-  servoDroite.writeMicroseconds(map(vitesse, 0, 255, 1550, 1000));
-}
-//Fonction avancer un peu vers la gauche
-void avanceGauche(int vitesse){
-  servoGauche.writeMicroseconds(map(vitesse, 0, 255, 1550, 1000));
-  servoDroite.writeMicroseconds(map(vitesse+42, 0, 255, 1550, 1000));
-
 }

@@ -1,8 +1,17 @@
+/*
+ * PROJET FIL ROUGE PARTIE 3
+ * AUTEUR : Marc GUEDON
+ * ROLE : Librairie pour l'utilisation des encodeurs optiques
+ */ 
+
 #include "OpticalEncodersLib.h"
 #include <Arduino.h>
 
+//Variables modifiées par interruptions
 volatile long rightCounter = 0;
 volatile long leftCounter = 0;
+
+float rotationAngle = 0;
 
 //Fonction initialisation encodeurs
 void initEncoders(){
@@ -49,12 +58,14 @@ float counterToCm(long counter){
   return (angle*PI/180) * (WHEEL_DIAM/2); //Calcul distance parcourue (en cm)
 }
 
+//Fonction getter
 long getLeftCounter(){
   long tmp = leftCounter;
   leftCounter = 0;
   return tmp;
 }
 
+//Fonction getter
 long getRightCounter(){
   long tmp = rightCounter;
   rightCounter =0;
@@ -66,38 +77,23 @@ bool isStraight(){
 }
 
 //Fonction calcul rotation rover
-//Renvoie une valeur négative si tourne à gauche      
-//        une valeur positive si tourne à droite
-//        0 sinon
-float rotationAngle = 0;
 float roverRotation(){
-  //float rotationAngle;
-
   //Le robot tourne à gauche
   if(leftCounter < 0 && rightCounter > 0){
     float distance = counterToCm(rightCounter);
-    rotationAngle -= (distance / ROVER_RADIUS);  //Calcul rotation rover (en degré)
+    rotationAngle -= (distance / ROVER_RADIUS);  //Calcul rotation rover (en radian)
   }
 
   //Le robot tourne à droite
   else if(leftCounter > 0 && rightCounter < 0){
     float distance = counterToCm(leftCounter);
-    rotationAngle += (distance / ROVER_RADIUS); //Calcul rotation rover (en degré)
+    rotationAngle += (distance / ROVER_RADIUS); //Calcul rotation rover (en radian)
   }
 
-  //Le robot avance ou recule
-  //else{
-  //  rotationAngle = 0;
-  //}
-
-  return rotationAngle/3;
+  return rotationAngle/PI;
 }
 
+//Fonction remise à zéro rotation rover
 void razAngle(){
   rotationAngle = 0;
 }
-
-//Fonction 
-/*boolean isTurning(){
-  return (leftCounter < (rightCounter-10)) || (leftCounter > (rightCounter+10));
-}*/

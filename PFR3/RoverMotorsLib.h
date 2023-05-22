@@ -1,14 +1,22 @@
+/*
+ * PROJET FIL ROUGE PARTIE 3
+ * AUTEUR : Marc GUEDON
+ * ROLE : Librairie pour l'utilisation des moteurs
+ */ 
+
 #ifndef __ROVER_MOTORS_LIB__
 #define __ROVER_MOTORS_LIB__
 
 #define LEFT_MOTORS_PIN   6
 #define RIGHT_MOTORS_PIN  7
 
-//Fonction initialisation
+//Fonction initialisation moteurs
 void initRover();
 
 //Fonctions avancer
 void avancer(int vitesse);
+void avanceDroite(int vitesse);
+void avanceGauche(int vitesse);
 void avancerTOR();
 
 //Fonctions reculer
@@ -20,10 +28,6 @@ void tournerGauche(int vitesse);
 
 //Fonction tourner à droite
 void tournerDroite(int vitesse);
-
-void avanceDroite(int vitesse);
-
-void avanceGauche(int vitesse);
 
 //Fonction arret
 void stop();
