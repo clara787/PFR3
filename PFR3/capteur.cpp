@@ -15,6 +15,7 @@ Ultrasonic ultrasonicAvant(9, 10); // Trig et Echo
 Ultrasonic ultrasonicWall(11, 12); // Trig et Echo
 
 bool ObstacleHere(){
+  Serial.println(ultrasonicAvant.Ranging(CM));
   int dist = ultrasonicAvant.Ranging(CM);
   return(dist <= 19);
 }
@@ -24,21 +25,27 @@ int Wall(){
   return (ultrasonicWall.Ranging(CM));
 }
 
+int compteur = 0;
+int dist = 0;
 void Scan(){
-  int dist = Wall();
+  if(compteur>10){
+    dist = Wall();
+    compteur = 0;
+  }
+  compteur++;
   int x = getPositionX();
   int y = getPositionY();
   
-  Serial.println("debut");
-  Serial.println(x);
-  Serial.println(y);
-  Serial.println(roverRotation());
-  Serial.println(roverRotation() * 57.32);
+  //Serial.println("debut");
+  //Serial.println(x);
+  //Serial.println(y);
+  //Serial.println(roverRotation());
+  //Serial.println(roverRotation() * 57.32);
   sendPosRobot(x/5,y/5);
   x = dist * -cos(roverRotation()) + x;
   y = dist * -sin(roverRotation()) + y;
-  Serial.println(x);
-  Serial.println(y);
+  //Serial.println(x);
+  //Serial.println(y);
   sendPoint(x/5,y/5);
 }
 

@@ -65,37 +65,37 @@ void handle_root(){
 }
 
 void handle_S(){
-  Serial.write("S");
+  for(int i=0;i<5;i++)Serial.print("S");
   server.send(200,"text/html",HTML_top+HTML_bottom);
 }
 
 void handle_G(){
-  Serial.write("G");
+  for(int i=0;i<5;i++)Serial.print("G");
   server.send(200,"text/html",HTML_top + HTML_bottom);
 }
 
 void handle_D(){
-  Serial.write("D");
+  for(int i=0;i<5;i++)Serial.print("D");
   server.send(200,"text/html",HTML_top + HTML_bottom);
 }
 
 void handle_B(){
-  Serial.write("B");
+  for(int i=0;i<5;i++)Serial.print("B");
   server.send(200,"text/html",HTML_top + HTML_bottom);
 }
 
 void handle_H(){
-  Serial.write("H");
+  for(int i=0;i<5;i++)Serial.print("H");
   server.send(200,"text/html",HTML_top + HTML_bottom);
 }
 
 void handle_A(){
-  Serial.write("A");
+  for(int i=0;i<5;i++)Serial.print("A");
   server.send(200,"text/html",HTML_top + HTML_bottom);
 }
 
 void handle_M(){
-  Serial.write("M");
+  for(int i=0;i<5;i++)Serial.print("M");
   server.send(200,"text/html",HTML_top + HTML_bottom);
 }
 

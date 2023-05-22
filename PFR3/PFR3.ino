@@ -10,6 +10,7 @@
 #define txPin 18
 
 int mode = 2;
+int modeTrace = 0;
 int mouvement = 0;
 unsigned char Button;
 int distanceMur;
@@ -50,6 +51,7 @@ void loop(){
     presence = ObstacleHere();
   }
   Button = getCharacterESP();
+  //Serial.println(Button);
   if (Button == 'A') mode = 1;
   if (Button == 'M'){
     mode = 2;
@@ -59,8 +61,6 @@ void loop(){
   if (mode==1) ModeAuto();
   else if (mode==2) ModeManuel();
 
-  
-  
   //if(mouvement == 0) angle = getAngle();
   //else if (abs(getAngle() - angle) >=85) mouvement = 0;
   
@@ -68,6 +68,11 @@ void loop(){
 
 
 void ModeAuto(){
+  //if(modeTrace == 0 && (getPositionX()>510 || getPositionX()<490) && (getPositionY()>510 || getPositionY()<490))modeTrace=1;
+  //if(modeTrace == 1 && (getPositionX()<510 && getPositionX()>490) && (getPositionY()<510 || getPositionY()>490)){
+  //  modeTrace = 0;
+  //  mode = 2;
+  //}
   if((distanceMur<=20)&& !(presence&&presencePre)){
     avanceGauche(162);
   }
@@ -76,7 +81,7 @@ void ModeAuto(){
     reculerTOR();
     delay(100);
     tournerGauche(175);
-    delay(480);
+    delay(550);
   }
   if (distanceMur>=20){
     avanceDroite(162);
