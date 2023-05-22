@@ -1,8 +1,14 @@
+//##############################################
+//#Auteur: BLAYES Hugo                         #
+//#Fonction: Programme ESP pour le PFR4        #
+//#                                            #
+//##############################################
 #include "esp_camera.h"
 #include <WiFi.h>
 #include "esp_http_server.h"
 #include <WebServer.h>  
 
+//Variable Globale
 String positionRobot;
 
 String point = "";
@@ -15,22 +21,29 @@ String HTML_top = "<!DOCTYPE html>\
 String HTML_bottom = "</h1>\
                       </body>\
                       </html>";
+
+//Déclaration du SSID et du PASSWORD de notre WebServer
 const char* ssid = "PFR3_WiFi_3";
 const char* password = "123456789";
 
+//Déclaration de notre WebServer sur le port 80
 WebServer server(80);
 
 void setup() {
-  // put your setup code here, to run once:
+  // Initialisation du port Serie avec lequel l'ESP communiquera avec l'Arduino
   Serial.begin(115200);
   while(!Serial);
 
+  //Configuration du ServerWeb
   WiFi.mode(WIFI_AP);
   WiFi.softAP(ssid, password);
 
+  //Création de la page HTML qui va être envoyé lorque l'on requête nos pages Web
   HTML = HTML_top + point + "<br>" + FT + HTML_bottom;
+  //Initialisation de la caméra
   InitialiserCamera();
 
+  //Déclaration des différentes pages 
   server.on("/",handle_root);
   server.on("/G",handle_G);
   server.on("/D",handle_D);
@@ -42,14 +55,17 @@ void setup() {
   server.on("/stream",HTTP_GET, FluxVideo);
   server.on("/image",HTTP_GET, FluxImage);
   server.on("/S",handle_S);
+
+  //Lancement du Server
   server.begin();
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  // Reecriture de la page HTML
   HTML = HTML_top + point + FT + HTML_bottom;
   server.handleClient();
   byte r;
+  //Tant que le Rover est alimenté on lit le port Serie afin de savoir si des données sont envoyé sur les ports de l'ESP
   if(Serial.available() > 0){
     r = Serial.read();
     if(r=='P')commuPoint();
@@ -58,51 +74,61 @@ void loop() {
   }
 }
 
+//Si la page principale est appellée on envoie la liste des points reçu par notre ESP
 void handle_root(){
   server.send(200,"text/html",HTML);
   point = "";
   FT = "";
 }
 
+//Si cette page est appelé on envoie des 'S' sur le port Série et en renvoie une page vide à l'utilisateur
 void handle_S(){
   for(int i=0;i<5;i++)Serial.print("S");
   server.send(200,"text/html",HTML_top+HTML_bottom);
 }
 
+//Si cette page est appelé on envoie des 'G' sur le port Série et en renvoie une page vide à l'utilisateur
 void handle_G(){
   for(int i=0;i<5;i++)Serial.print("G");
   server.send(200,"text/html",HTML_top + HTML_bottom);
 }
 
+//Si cette page est appelé on envoie des 'D' sur le port Série et en renvoie une page vide à l'utilisateur
 void handle_D(){
   for(int i=0;i<5;i++)Serial.print("D");
   server.send(200,"text/html",HTML_top + HTML_bottom);
 }
 
+//Si cette page est appelé on envoie des 'B' sur le port Série et en renvoie une page vide à l'utilisateur
 void handle_B(){
   for(int i=0;i<5;i++)Serial.print("B");
   server.send(200,"text/html",HTML_top + HTML_bottom);
 }
 
+//Si cette page est appelé on envoie des 'H' sur le port Série et en renvoie une page vide à l'utilisateur
 void handle_H(){
   for(int i=0;i<5;i++)Serial.print("H");
   server.send(200,"text/html",HTML_top + HTML_bottom);
 }
 
+//Si cette page est appelé on envoie des 'A' sur le port Série et en renvoie une page vide à l'utilisateur
 void handle_A(){
   for(int i=0;i<5;i++)Serial.print("A");
   server.send(200,"text/html",HTML_top + HTML_bottom);
 }
 
+//Si cette page est appelé on envoie des 'M' sur le port Série et en renvoie une page vide à l'utilisateur
 void handle_M(){
   for(int i=0;i<5;i++)Serial.print("M");
   server.send(200,"text/html",HTML_top + HTML_bottom);
 }
 
+//Si cette page est appelé on envoie la position du robot à l'utilisateur
 void handle_robot(){
   server.send(200,"text/html",HTML_top+positionRobot+HTML_bottom);
 }
 
+//Fonction permettant de lire et de mettre en forme les points
 void commuPoint(){
   char c;
   String point_tempo;
@@ -115,6 +141,7 @@ void commuPoint(){
  point += point_tempo + "<br>";
 }
 
+//Fonction permettant de lire et de mettre en forme les points et de les rajouter à la prochaine page Web
 void commuRobot(){
   char c;
   String point_tempo;
@@ -128,6 +155,7 @@ void commuRobot(){
  positionRobot += "<br>";
 }
 
+//Fonction permettant d'envoyer la fin de tracé
 void commuFinTrame(){
   char c;
   String trame_Tempo;
@@ -140,6 +168,7 @@ void commuFinTrame(){
   FT = trame_Tempo;
 }
 
+//Fonction permettant d'initialiser les tampons de la caméra
 esp_err_t InitialiserCamera(){
     // Variables locales de la fonction
     esp_err_t       Retour_L;
@@ -184,34 +213,7 @@ esp_err_t InitialiserCamera(){
     return(Retour_L);
 }
 
-void FluxVideo(){
-    String EnteteHtmlInitiale_L = "HTTP/1.1 200 OK\r\n" \
-        "Access-Control-Allow-Origin: *\r\n" \
-        "Content-Type: multipart/x-mixed-replace; boundary=FinDeLaSection\r\n\r\n;";
-    String EnteteHtmlIntermediaire_L = "--FinDeLaSection\r\n" \
-        "Content-Type: image/jpeg\r\n\r\n";
-    WiFiClient Client_L;
-    camera_fb_t *TamponVideo_L = NULL; 
-  
-    server.sendContent(EnteteHtmlInitiale_L);
-    Client_L = server.client();
-    while (Client_L.connected())
-    {   
-        // Le navigateur Web client est toujours connecté
-        TamponVideo_L = esp_camera_fb_get(); // Récupère une image depuis la caméra      
-        server.sendContent(EnteteHtmlIntermediaire_L);
-        Client_L.write((char *)TamponVideo_L->buf, TamponVideo_L->len);
-        server.sendContent("\r\n");
-         
-        // Réamorcage du tampon video, indispensable pour sa réutilisation
-        if (TamponVideo_L)
-        {
-            esp_camera_fb_return(TamponVideo_L);
-            TamponVideo_L = NULL;
-        }
-    }
-}
-
+//Fontion permettant de charger l'image prise par la caméra à l'appel de la fonction et de l'envoyer à l'utilisateur 
 void FluxImage(){
     camera_fb_t* fb = esp_camera_fb_get();
     server.setContentLength(fb->len);
@@ -223,3 +225,40 @@ void FluxImage(){
     // Réamorcage du tampon video, indispensable pour sa réutilisation
     esp_camera_fb_return(fb);  
 }
+
+/*
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%&@%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%&@@@&@@@@@@&@@@@%%%@%&@%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@@@@@@@&@@@@@%%%%&%%&&@@@%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@@@@@@@@@@%@@@@@@@@%%%@@@@@@@@&%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%&@@@@@@@@&@@@@@@@@@@@@@@@@@@@@@%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@@@@@@@&@@@@@@@@@@@@@@@@@@@@@@%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@@@@@@@&@@@@@@@@@@@@@@@@@@@@@@%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@@@@@@@&@@@@@@@%%@@@@@@@@@@@@@@%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%&@@@@@%@@@@@@@@@%@%%@@@@@@@@@@@%%%%@@%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@@@@@@&@@@@@@@@@%%%%@@@@@@@@@&%%%%@@@%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@@@@@@&@@@@@@@@%%&%%%@@@@@@@@%%%%%&@@@@%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@@@@&@@@@@@@@@@%@&%%%@@@@@@%%%%%%@@@@@@%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@@@@@%@@@@@@@@@@@@@%%%@@@@%%%%%%@@@@@@@@@@&%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@@@@@@%@@@@@@@@@@@@@@%%@@%%%%%@@@@@@@@@@@@@@@&%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%&@@@@@@@@@%@@@@@@@@@@@@@@@@@@&@@@@@@@@@@@@@@@@@@@@@%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@&%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@@@@@@@@@@%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@@@@@@@@@@@%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@@@@@@@@@@@&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@&%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@@@@@@@@@@@%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@&%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%&@@@@@@@@@@@@@@@@@@@@@@&@@@@@@@@@@&%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@@@@@@@@@@@@@@@@@@@@@@@@%@@@@@@@@@@%&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@@@@@@@@@@@@@@@@@@@@@@@@%%%@@@@@@@@@%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@@@@@@@@@@@@@@@@@@@@@@@@&%%%%@@@@@@@@%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@&@@@&%%
+*/
