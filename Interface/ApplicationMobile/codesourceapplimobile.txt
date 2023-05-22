@@ -1,0 +1,450 @@
+//##################################################
+//#Auteur: BLAYES Hugo                             #
+//#Fontion: Code Application Mobile                #
+//#                                                #
+//##################################################
+package com.example.pfr3;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.annotation.SuppressLint;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Point;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import com.android.volley.RequestQueue;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
+import android.util.Log;
+import android.view.MotionEvent;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageView;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.ArrayList;
+
+public class MainActivity extends AppCompatActivity {
+    //variables globales
+    String URL_G;
+    String URL_D;
+    String URL_H;
+    String URL_B;
+    String URL_A;
+    String URL_M;
+    URL URL_P;
+    URL URL_R;
+    String URL_S;
+    Button buttonManuel;
+    Button buttonAutomatique;
+    Button buttonAvant;
+    Button buttonArriere;
+    Button buttonGauche;
+    Button buttonDroite;
+    private SurfaceView Image_Map;
+    private SurfaceHolder Holder_Map;
+    ArrayList<Point> points = new ArrayList<>();
+    RequestQueue queue;
+
+
+    //Fonction création de la fenêtre
+    @SuppressLint("ClickableViewAccessibility")
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        this.buttonManuel =this.findViewById(R.id.button5);
+        this.buttonAutomatique = this.findViewById(R.id.button6);
+        this.buttonAvant = this.findViewById(R.id.button);
+        this.buttonArriere = this.findViewById(R.id.button2);
+        this.buttonGauche = this.findViewById(R.id.button3);
+        this.buttonDroite = this.findViewById(R.id.button4);
+        queue = Volley.newRequestQueue(this);
+        //definition URL
+        URL_G = "http://192.168.4.1/G";
+        URL_D = "http://192.168.4.1/D";
+        URL_H = "http://192.168.4.1/H";
+        URL_B = "http://192.168.4.1/B";
+        URL_A = "http://192.168.4.1/A";
+        URL_M = "http://192.168.4.1/M";
+        URL_S = "http://192.168.4.1/S";
+        try {
+            URL_P = new URL("http://192.168.4.1/");
+            URL_R = new URL("http://192.168.4.1/robot");
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        //set des listeners des bouttons
+            //Listener du bouton Manuel
+            this.buttonManuel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Lorsque le bouton est cliqué envoi un package Get à l'ESP
+                StringRequest stringRequest = new StringRequest(Request.Method.GET, URL_M, new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+
+                    }
+                },
+                        new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                error.printStackTrace();
+                            }
+                });
+                //Add la requete au différente requete
+                queue.add(stringRequest);
+            }
+        });
+        //set Listener Bouton Automatique
+        this.buttonAutomatique.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //envoi du package à la page A de l'ESP
+                StringRequest stringRequest = new StringRequest(Request.Method.GET, URL_A, new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+
+                    }
+                },
+                        new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                error.printStackTrace();
+                            }
+                        });
+                queue.add(stringRequest);
+            }
+        });
+        //set listener du bouton
+        this.buttonDroite.setOnTouchListener(new View.OnTouchListener(){
+            @Override
+            public boolean onTouch(View v, MotionEvent event){
+                int action = event.getAction();
+                //lorsque la touche est relaché on envoie une requête S à l'URL
+                if(action==MotionEvent.ACTION_UP){
+                    StringRequest stringRequest = new StringRequest(Request.Method.GET, URL_S, new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+
+                        }
+                    },
+                            new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    error.printStackTrace();
+                                }
+                            });
+                    queue.add(stringRequest);
+                    return true;
+                }
+                //lorsque la touche est appuyé on envoie une reqête D à l'ESP
+                if(action==MotionEvent.ACTION_DOWN){
+                    StringRequest stringRequest = new StringRequest(Request.Method.GET, URL_D, new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+
+                        }
+                    },
+                            new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    error.printStackTrace();
+                                }
+                            });
+                    queue.add(stringRequest);
+                    return true;
+                }
+                return false;
+            }
+        });
+        this.buttonArriere.setOnTouchListener(new View.OnTouchListener(){
+            @Override
+            public boolean onTouch(View v, MotionEvent event){
+                int action = event.getAction();
+                if(action==MotionEvent.ACTION_UP){
+                    StringRequest stringRequest = new StringRequest(Request.Method.GET, URL_S, new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+
+                        }
+                    },
+                            new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    error.printStackTrace();
+                                }
+                            });
+                    queue.add(stringRequest);
+                    return true;
+                }
+                if(action==MotionEvent.ACTION_DOWN){
+                    StringRequest stringRequest = new StringRequest(Request.Method.GET, URL_B, new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+
+                        }
+                    },
+                            new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    error.printStackTrace();
+                                }
+                            });
+                    queue.add(stringRequest);
+                    return true;
+                }
+                return false;
+            }
+        });
+        this.buttonAvant.setOnTouchListener(new View.OnTouchListener(){
+            @Override
+            public boolean onTouch(View v, MotionEvent event){
+                int action = event.getAction();
+                if(action==MotionEvent.ACTION_UP){
+                    StringRequest stringRequest = new StringRequest(Request.Method.GET, URL_S, new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+
+                        }
+                    },
+                            new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    error.printStackTrace();
+                                }
+                            });
+                    queue.add(stringRequest);
+                    return true;
+                }
+                if(action==MotionEvent.ACTION_DOWN){
+                    StringRequest stringRequest = new StringRequest(Request.Method.GET, URL_H, new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+
+                        }
+                    },
+                            new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    error.printStackTrace();
+                                }
+                            });
+                    queue.add(stringRequest);
+                    return true;
+                }
+                return false;
+            }
+        });
+        this.buttonGauche.setOnTouchListener(new View.OnTouchListener(){
+            @Override
+            public boolean onTouch(View v, MotionEvent event){
+                int action = event.getAction();
+                if(action==MotionEvent.ACTION_UP){
+                    StringRequest stringRequest = new StringRequest(Request.Method.GET, URL_S, new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+
+                        }
+                    },
+                            new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    error.printStackTrace();
+                                }
+                            });
+                    queue.add(stringRequest);
+                    return true;
+                }
+                if(action==MotionEvent.ACTION_DOWN){
+                    StringRequest stringRequest = new StringRequest(Request.Method.GET, URL_G, new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+
+                        }
+                    },
+                            new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    error.printStackTrace();
+                                }
+                            });
+                    queue.add(stringRequest);
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        //Recuperation de la bitmap afin de pouvoir afficher les points
+        Image_Map = findViewById(R.id.surfaceView);
+        Holder_Map = Image_Map.getHolder();
+
+
+        //Création du thread permettant de récupérer les points, la position du robot et l'image de la caméra
+        Thread t = new Thread(){
+            public void run(){
+                while(true) {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    ChangeImageCam();
+                    ChangeMap();
+                }
+            }
+        };
+
+        t.start();
+    }
+
+    //fonction permettant de parser l'image de la caméra et de l'afficher sur le téléphone
+    public void ChangeImageCam(){
+        new DownloadImageTask((ImageView) findViewById(R.id.imageView2))
+                .execute("http://192.168.4.1/image");
+
+    }
+
+    //fonction permetant de parser la racine du server web afin de trouver les points et de les afficher sur la map
+    public void ChangeMap() {
+
+        URLConnection connection = null;
+        try {
+            connection = URL_P.openConnection();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        InputStream inputStream = null;
+        try {
+            inputStream = connection.getInputStream();
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+
+            String line;
+            StringBuilder content = new StringBuilder();
+            while ((line = reader.readLine()) != null) {
+                for(int i=0;i<line.length();i++){
+                    if(line.charAt(i)=='X'){
+                        int j = i;
+                        int p = 0;
+                        for(int k = i+1;k<i+30;k++){
+                            if(line.charAt(k)=='Y')p = k;
+                            if(line.charAt(k)=='F'){
+                                Log.d("TAG",line.substring(i+1,p));
+                                Log.d("TAG",line.substring(p+1, k));
+                                try {
+                                    Point pos = new Point(Integer.parseInt(line.substring(i + 1, p))-450, Integer.parseInt(line.substring(p + 1, k))-450);
+                                    points.add(pos);
+                                }catch(NumberFormatException e){
+                                    e.printStackTrace();
+                                }
+
+                                break;
+                            }
+                        }
+                    }
+                }
+
+            }
+
+            try {
+                connection = URL_R.openConnection();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            inputStream = connection.getInputStream();
+
+            reader = new BufferedReader(new InputStreamReader(inputStream));
+
+            Point Rpos = new Point(0,0);
+
+            content = new StringBuilder();
+            while ((line = reader.readLine()) != null) {
+                for(int i=0;i<line.length();i++){
+                    if(line.charAt(i)=='X'){
+                        int j = i;
+                        int p = 0;
+                        for(int k = i;k<i+30;k++){
+                            if(line.charAt(k)=='Y')p = k;
+                            if(line.charAt(k)=='F'){
+                                try {
+                                    Rpos = new Point(Integer.parseInt(line.substring(i + 1, p))-450, Integer.parseInt(line.substring(p + 1, k))-450);
+                                }catch(NumberFormatException e){
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            Bitmap bitmap = Bitmap.createBitmap(Image_Map.getWidth(), Image_Map.getHeight(), Bitmap.Config.ARGB_8888);
+
+            Paint paint = new Paint();
+            paint.setColor(Color.BLUE);
+            paint.setAntiAlias(true);
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setStrokeWidth(25);
+
+
+            Canvas canva = Holder_Map.lockCanvas();
+
+            canva.drawColor(Color.WHITE);
+            Log.d("TAG",points.toString());
+            for (Point p : points){
+                canva.drawPoint(p.x-400, p.y-400, paint);
+            }
+
+            paint.setColor(Color.RED);
+            canva.drawPoint(Rpos.x-400,Rpos.y-400,paint);
+
+            Holder_Map.unlockCanvasAndPost(canva);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
+        ImageView bmImage;
+
+        public DownloadImageTask(ImageView bmImage) {
+            this.bmImage = bmImage;
+        }
+
+        protected Bitmap doInBackground(String... urls) {
+            String urldisplay = urls[0];
+            Bitmap mIcon11 = null;
+            try {
+                InputStream in = new java.net.URL(urldisplay).openStream();
+                mIcon11 = BitmapFactory.decodeStream(in);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return mIcon11;
+        }
+
+        protected void onPostExecute(Bitmap result) {
+            bmImage.setImageBitmap(result);
+        }
+    }
+}
+
+s
