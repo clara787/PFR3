@@ -52,7 +52,6 @@ void setup() {
   server.on("/A",handle_A);
   server.on("/M",handle_M);
   server.on("/robot",handle_robot);
-  server.on("/stream",HTTP_GET, FluxVideo);
   server.on("/image",HTTP_GET, FluxImage);
   server.on("/S",handle_S);
 
@@ -135,6 +134,7 @@ void commuPoint(){
   while(c!='F'){
     if(Serial.available()>0){
       c = Serial.read();
+      if(!(c=='0' || c=='1' || c=='2' || c=='3' || c=='4' || c=='5' || c=='6' || c=='7' || c=='8' || c=='9' || c=='X' || c=='Y' || c=='F'))return;
       point_tempo += c; 
     }
   }
@@ -149,6 +149,7 @@ void commuRobot(){
   while(c!='F'){
     if(Serial.available()>0){
       c = Serial.read();
+      if(!(c=='0' || c=='1' || c=='2' || c=='3' || c=='4' || c=='5' || c=='6' || c=='7' || c=='8' || c=='9' || c=='X' || c=='Y' || c=='F'))return;
       positionRobot += c; 
     }
   }
